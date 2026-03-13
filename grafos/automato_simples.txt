@@ -1,0 +1,106 @@
+# Exemplo de definição de AFD para Mineires
+# Estados: nome tipo [token_type]
+# Transições: origem destino caractere
+
+[ESTADOS]
+q0 INICIAL
+q_a FINAL IDENTIFIER
+q_2 FINAL NUMBER_INT
+
+q_u INTERMEDIARIO
+q_ua INTERMEDIARIO
+q_uai FINAL IDENTIFIER
+
+q_c INTERMEDIARIO
+q_ca INTERMEDIARIO
+q_cab INTERMEDIARIO
+q_cabo FINAL IDENTIFIER
+
+q_b INTERMEDIARIO
+q_bo INTERMEDIARIO
+q_bor INTERMEDIARIO
+q_bora INTERMEDIARIO
+q_bora_ INTERMEDIARIO
+q_bora_c INTERMEDIARIO
+q_bora_cu INTERMEDIARIO
+q_bora_cum INTERMEDIARIO
+q_bora_cump INTERMEDIARIO
+q_bora_cumpa INTERMEDIARIO
+q_bora_cumpad INTERMEDIARIO
+q_bora_cumpade FINAL IDENTIFIER
+
+q_s INTERMEDIARIO
+q_si INTERMEDIARIO
+q_sim INTERMEDIARIO
+q_simb INTERMEDIARIO
+q_simbo INTERMEDIARIO
+q_simbor INTERMEDIARIO
+q_simbora FINAL IDENTIFIER
+
+q_f INTERMEDIARIO
+q_fi INTERMEDIARIO
+q_fic INTERMEDIARIO
+q_fica INTERMEDIARIO
+q_fica_ INTERMEDIARIO
+q_fica_a INTERMEDIARIO
+q_fica_as INTERMEDIARIO
+q_fica_ass INTERMEDIARIO
+q_fica_assi INTERMEDIARIO
+q_fica_assim INTERMEDIARIO
+q_fica_assim_ INTERMEDIARIO
+q_fica_assim_e INTERMEDIARIO
+q_fica_assim_en INTERMEDIARIO
+q_fica_assim_ent INTERMEDIARIO
+q_fica_assim_enta INTERMEDIARIO
+q_fica_assim_entao FINAL IDENTIFIER
+
+[TRANSICOES]
+q0 q_a a
+q0 q_2 2
+
+q0 q_u u
+q_u q_ua a
+q_ua q_uai i
+
+q0 q_c c
+q_c q_ca a
+q_ca q_cab b
+q_cab q_cabo o
+
+q0 q_b b
+q_b q_bo o
+q_bo q_bor r
+q_bor q_bora a
+q_bora q_bora_ _
+q_bora_ q_bora_c c
+q_bora_c q_bora_cu u
+q_bora_cu q_bora_cum m
+q_bora_cum q_bora_cump p
+q_bora_cump q_bora_cumpa a
+q_bora_cumpa q_bora_cumpad d
+q_bora_cumpad q_bora_cumpade e
+
+q0 q_s s
+q_s q_si i
+q_si q_sim m
+q_sim q_simb b
+q_simb q_simbo o
+q_simbo q_simbor r
+q_simbor q_simbora a
+
+q0 q_f f
+q_f q_fi i
+q_fi q_fic c
+q_fic q_fica a
+q_fica q_fica_ _
+q_fica_ q_fica_a a
+q_fica_a q_fica_as s
+q_fica_as q_fica_ass s
+q_fica_ass q_fica_assi i
+q_fica_assi q_fica_assim m
+q_fica_assim q_fica_assim_ _
+q_fica_assim_ q_fica_assim_e e
+q_fica_assim_e q_fica_assim_en n
+q_fica_assim_en q_fica_assim_ent t
+q_fica_assim_ent q_fica_assim_enta a
+q_fica_assim_enta q_fica_assim_entao o
