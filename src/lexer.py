@@ -1,0 +1,156 @@
+# analisador léxico para mineires.
+from typing import List, Optional, Generator
+from automato import Automato
+from token_type import TokenType, RESERVED_WORDS
+from mineires_token import Token
+
+class Lexer:
+    def __init__(self, automato: Automato, mostrar_erros: bool = True):
+        # inicializa o Lexer com um autômato.
+        # args: automato: Autômato configurado para reconhecer tokens
+        #       mostrar_erros: Se True, imprime erros léxicos no terminal
+        self.automato = automato
+        self.mostrar_erros = mostrar_erros
+        self.codigo: str = ""
+        self.posicao: int = 0
+        self.linha: int = 1
+        self.coluna: int = 1
+        self.tokens: List[Token] = []
+    def carregar_arquivo(self, caminho: str) -> None:
+        with open(caminho, 'r', encoding='utf-8') as f:
+            self.codigo = f.read()
+        self.posicao = 0
+        self.linha = 1
+        self.coluna = 1
+        self.tokens = []
+    def carregar_string(self, codigo: str) -> None:
+        self.codigo = codigo
+        self.posicao = 0
+        self.linha = 1
+        self.coluna = 1
+        self.tokens = []
+    def _char_atual(self) -> Optional[str]:
+        # retorna o caractere atual ou None se fim do arquivo.
+        if self.posicao < len(self.codigo):
+            return self.codigo[self.posicao]
+        return None
+    def _avancar(self) -> Optional[str]:
+        if self.posicao >= len(self.codigo):
+            return None
+        char = self.codigo[self.posicao]
+        self.posicao += 1
+        if char == '\n':
+            self.linha += 1
+            self.coluna = 1
+        else:
+            self.coluna += 1
+        return char
+    def _peek(self, offset: int = 1) -> Optional[str]:
+        # olha caracteres à frente sem consumir
+        # args: offset: Quantos caracteres à frente (1 = próximo)
+        # retorna: o caractere na posição ou None se fim do arquivo
+        pos = self.posicao + offset
+        if pos < len(self.codigo):
+            return self.codigo[pos]
+        return None
+    def _pular_espacos(self) -> None:
+        while self._char_atual() is not None and self._char_atual() in ' \t\r\n':
+            self._avancar()
+    def _consumir_lexema_invalido(self) -> str:
+        # consome um trecho inválido contínuo até espaço em branco ou fim
+        lexema_invalido = ""
+        while self._char_atual() is not None and self._char_atual() not in ' \t\r\n':
+            lexema_invalido += self._avancar() or ""
+        return lexema_invalido
+    def _reconhecer_com_automato(self) -> Optional[Token]:
+        if self.automato.estado_inicial is None:
+            return None
+        estado_atual = self.automato.estado_inicial
+        lexema = ""
+        linha_inicio = self.linha
+        coluna_inicio = self.coluna
+        ultimo_estado_final = None
+        ultimo_lexema = ""
+        ultima_posicao = self.posicao
+        ultima_linha = self.linha
+        ultima_coluna = self.coluna
+        while self._char_atual() is not None:
+            char = self._char_atual()
+            proximo = self.automato.proximo_estado(estado_atual, char)
+            if proximo is None:
+                # Sem transição, para aqui
+                break
+            lexema += char
+            self._avancar()
+            estado_atual = proximo
+            # Se chegou em estado final, guarda como candidato
+            if self.automato.eh_estado_final(estado_atual):
+                ultimo_estado_final = estado_atual
+                ultimo_lexema = lexema
+                ultima_posicao = self.posicao
+                ultima_linha = self.linha
+                ultima_coluna = self.coluna
+        # Se encontrou estado final, retorna o token
+        if ultimo_estado_final is not None:
+            # Restaura posição para depois do último token válido
+            self.posicao = ultima_posicao
+            self.linha = ultima_linha
+            self.coluna = ultima_coluna
+            token_type = self.automato.get_token_type(ultimo_estado_final)
+            # Verifica se é palavra reservada (para identificadores)
+            if token_type == TokenType.IDENTIFIER:
+                if ultimo_lexema in RESERVED_WORDS:
+                    token_type = RESERVED_WORDS[ultimo_lexema]
+            return Token(ultimo_lexema, token_type, linha_inicio, coluna_inicio)
+        return None
+    
+    def analisar(self) -> List[Token]:
+        self.tokens = []
+        while self._char_atual() is not None:
+            # Pula espaços em branco
+            self._pular_espacos()
+            if self._char_atual() is None:
+                break
+            linha_inicio = self.linha
+            coluna_inicio = self.coluna
+            # Tenta reconhecer com o autômato
+            token = self._reconhecer_com_automato()
+            if token is not None:
+                # Ignora tokens de whitespace se necessário
+                if token.tipo != TokenType.WHITESPACE:
+                    self.tokens.append(token)
+            else:
+                # Lexema não reconhecido - erro léxico
+                lexema_invalido = self._consumir_lexema_invalido()
+                erro = Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
+                self.tokens.append(erro)
+                if self.mostrar_erros:
+                    print(f"Erro léxico: string '{lexema_invalido}' não reconhecida "
+                          f"na linha {linha_inicio}, coluna {coluna_inicio}")
+        # Adiciona token de fim de arquivo
+        self.tokens.append(Token("EOF", TokenType.EOF, self.linha, self.coluna))
+        return self.tokens
+    def tokens_generator(self) -> Generator[Token, None, None]:
+        while self._char_atual() is not None:
+            self._pular_espacos()
+            if self._char_atual() is None:
+                break
+            linha_inicio = self.linha
+            coluna_inicio = self.coluna
+            token = self._reconhecer_com_automato()
+            if token is not None:
+                if token.tipo != TokenType.WHITESPACE:
+                    yield token
+            else:
+                lexema_invalido = self._consumir_lexema_invalido()
+                yield Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
+        yield Token("EOF", TokenType.EOF, self.linha, self.coluna)    
+    def imprimir_tokens(self) -> None:
+        print("\n" + "=" * 70)
+        print(f"{'LEXEMA':<30} {'TIPO':<25} {'LINHA':<7} {'COLUNA':<7}")
+        print("=" * 70)
+        for token in self.tokens:
+            lexema_display = repr(token.lexema) if len(token.lexema) <= 28 else repr(token.lexema[:25] + "...")
+            print(f"{lexema_display:<30} {token.tipo.name:<25} {token.linha:<7} {token.coluna:<7}")
+        print("=" * 70)
+        print(f"Total de tokens: {len(self.tokens)}")
