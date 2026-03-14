@@ -1,17 +1,30 @@
-Tokens identificados: 10
+Tokens identificados: 23
 
 Tokens (tupla):
-('bora_cumpade', 'MAIN', 1, 1)
-('simbora', 'BEGIN_BLOCK', 2, 1)
-('a', 'IDENTIFIER', 3, 1)
-('fica_assim_entao', 'ASSIGN', 3, 3)
-('2', 'NUMBER_INT', 3, 20)
-('uai', 'SEMICOLON', 3, 22)
-('uai', 'SEMICOLON', 4, 1)
-('cabou', 'END_BLOCK', 5, 1)
-('int', 'ERROR', 6, 1)
-('EOF', 'EOF', 6, 4)
+('c_nao', 'ELSE', 1, 1)
+('c_to_pensanu', 'IF', 2, 1)
+('c_nao_c_to_pensanu', 'ELIF', 3, 1)
+('bora_cumpade', 'MAIN', 4, 1)
+('simbora', 'BEGIN_BLOCK', 5, 1)
+('a', 'IDENTIFIER', 6, 1)
+('fica_assim_entao', 'ASSIGN', 6, 3)
+('2', 'NUMBER_INT', 6, 20)
+('uai', 'SEMICOLON', 6, 22)
+('uai', 'SEMICOLON', 7, 1)
+('cabou', 'END_BLOCK', 8, 1)
+('xove', 'INPUT', 9, 1)
+('int', 'ERROR', 10, 1)
+('oia_proce_ve', 'OUTPUT', 12, 1)
+('causo', 'COMMENT_START', 13, 1)
+('fim_do_causo', 'COMMENT_END', 14, 1)
+('simbora', 'BEGIN_BLOCK', 15, 1)
+('trem_di_numero', 'IDENTIFIER', 16, 1)
+('trem_cum_virgula', 'FLOAT', 17, 1)
+('trem_discrita', 'STRING', 18, 1)
+('trem_discolhe', 'BOOLEAN', 19, 1)
+('trosso', 'CHAR', 20, 1)
+('EOF', 'EOF', 20, 7)
 
 Resumo:
-- Identificados: 10
+- Identificados: 23
 - Não identificados: 1

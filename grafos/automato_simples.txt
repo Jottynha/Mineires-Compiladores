@@ -7,17 +7,9 @@ q0 INICIAL
 q_a FINAL IDENTIFIER
 q_2 FINAL NUMBER_INT
 
-q_u INTERMEDIARIO
-q_ua INTERMEDIARIO
-q_uai FINAL IDENTIFIER
-
-q_c INTERMEDIARIO
-q_ca INTERMEDIARIO
-q_cab INTERMEDIARIO
-q_cabo INTERMEDIARIO
-q_cabou FINAL IDENTIFIER
 
 q_b INTERMEDIARIO
+
 q_bo INTERMEDIARIO
 q_bor INTERMEDIARIO
 q_bora INTERMEDIARIO
@@ -30,15 +22,52 @@ q_bora_cumpa INTERMEDIARIO
 q_bora_cumpad INTERMEDIARIO
 q_bora_cumpade FINAL IDENTIFIER
 
-q_s INTERMEDIARIO
-q_si INTERMEDIARIO
-q_sim INTERMEDIARIO
-q_simb INTERMEDIARIO
-q_simbo INTERMEDIARIO
-q_simbor INTERMEDIARIO
-q_simbora FINAL IDENTIFIER
+
+q_c INTERMEDIARIO
+
+q_ca INTERMEDIARIO
+q_cab INTERMEDIARIO
+q_cabo INTERMEDIARIO
+q_cabou FINAL IDENTIFIER
+
+q_cau INTERMEDIARIO
+q_caus INTERMEDIARIO
+q_causo FINAL IDENTIFIER
+
+
+q_c_ INTERMEDIARIO
+
+q_c_n INTERMEDIARIO
+q_c_na INTERMEDIARIO
+q_c_nao FINAL IDENTIFIER
+q_c_nao_ INTERMEDIARIO
+q_c_nao_c INTERMEDIARIO
+q_c_nao_c_ INTERMEDIARIO
+q_c_nao_c_t INTERMEDIARIO
+q_c_nao_c_to INTERMEDIARIO
+q_c_nao_c_to_ INTERMEDIARIO
+q_c_nao_c_to_p INTERMEDIARIO
+q_c_nao_c_to_pe INTERMEDIARIO
+q_c_nao_c_to_pen INTERMEDIARIO
+q_c_nao_c_to_pens INTERMEDIARIO
+q_c_nao_c_to_pensa INTERMEDIARIO
+q_c_nao_c_to_pensan INTERMEDIARIO
+q_c_nao_c_to_pensanu FINAL IDENTIFIER
+
+q_c_t INTERMEDIARIO
+q_c_to INTERMEDIARIO
+q_c_to_ INTERMEDIARIO
+q_c_to_p INTERMEDIARIO
+q_c_to_pe INTERMEDIARIO
+q_c_to_pen INTERMEDIARIO
+q_c_to_pens INTERMEDIARIO
+q_c_to_pensa INTERMEDIARIO
+q_c_to_pensan INTERMEDIARIO
+q_c_to_pensanu FINAL IDENTIFIER
+
 
 q_f INTERMEDIARIO
+
 q_fi INTERMEDIARIO
 q_fic INTERMEDIARIO
 q_fica INTERMEDIARIO
@@ -55,21 +84,112 @@ q_fica_assim_ent INTERMEDIARIO
 q_fica_assim_enta INTERMEDIARIO
 q_fica_assim_entao FINAL IDENTIFIER
 
+q_fim INTERMEDIARIO
+q_fim_ INTERMEDIARIO
+q_fim_d INTERMEDIARIO
+q_fim_do INTERMEDIARIO
+q_fim_do_ INTERMEDIARIO
+q_fim_do_c INTERMEDIARIO
+q_fim_do_ca INTERMEDIARIO
+q_fim_do_cau INTERMEDIARIO
+q_fim_do_caus INTERMEDIARIO
+q_fim_do_causo FINAL IDENTIFIER
+
+
+q_o INTERMEDIARIO
+
+q_oi INTERMEDIARIO
+q_oia INTERMEDIARIO
+q_oia_ INTERMEDIARIO
+q_oia_p INTERMEDIARIO
+q_oia_pr INTERMEDIARIO
+q_oia_pro INTERMEDIARIO
+q_oia_proc INTERMEDIARIO
+q_oia_proce INTERMEDIARIO
+q_oia_proce_ INTERMEDIARIO
+q_oia_proce_v INTERMEDIARIO
+q_oia_proce_ve FINAL IDENTIFIER
+
+
+q_s INTERMEDIARIO
+
+q_si INTERMEDIARIO
+q_sim INTERMEDIARIO
+q_simb INTERMEDIARIO
+q_simbo INTERMEDIARIO
+q_simbor INTERMEDIARIO
+q_simbora FINAL IDENTIFIER
+
+
+q_t INTERMEDIARIO
+
+q_tr INTERMEDIARIO
+q_tre INTERMEDIARIO
+q_trem INTERMEDIARIO
+q_trem_ INTERMEDIARIO
+
+q_trem_c INTERMEDIARIO
+q_trem_cu INTERMEDIARIO
+q_trem_cum INTERMEDIARIO
+q_trem_cum_ INTERMEDIARIO
+q_trem_cum_v INTERMEDIARIO
+q_trem_cum_vi INTERMEDIARIO
+q_trem_cum_vir INTERMEDIARIO
+q_trem_cum_virg INTERMEDIARIO
+q_trem_cum_virgu INTERMEDIARIO
+q_trem_cum_virgul INTERMEDIARIO
+q_trem_cum_virgula FINAL IDENTIFIER
+
+q_trem_d INTERMEDIARIO
+q_trem_di INTERMEDIARIO
+q_trem_dis INTERMEDIARIO
+q_trem_disc INTERMEDIARIO
+
+q_trem_disco INTERMEDIARIO
+q_trem_discol INTERMEDIARIO
+q_trem_discolh INTERMEDIARIO
+q_trem_discolhe FINAL IDENTIFIER
+
+q_trem_discr INTERMEDIARIO
+q_trem_discri INTERMEDIARIO
+q_trem_discrit INTERMEDIARIO
+q_trem_discrita FINAL IDENTIFIER
+
+q_trem_di_ INTERMEDIARIO
+q_trem_di_n INTERMEDIARIO
+q_trem_di_nu INTERMEDIARIO
+q_trem_di_num INTERMEDIARIO
+q_trem_di_nume INTERMEDIARIO
+q_trem_di_numer INTERMEDIARIO
+q_trem_di_numero FINAL IDENTIFIER
+
+q_tro INTERMEDIARIO
+q_tros INTERMEDIARIO
+q_tross INTERMEDIARIO
+q_trosso FINAL IDENTIFIER
+
+
+q_u INTERMEDIARIO
+
+q_ua INTERMEDIARIO
+q_uai FINAL IDENTIFIER
+
+
+q_x INTERMEDIARIO
+
+q_xo INTERMEDIARIO
+q_xov INTERMEDIARIO
+q_xove FINAL IDENTIFIER
+
+
+
 [TRANSICOES]
 q0 q_a a
 q0 q_2 2
 
-q0 q_u u
-q_u q_ua a
-q_ua q_uai i
-
-q0 q_c c
-q_c q_ca a
-q_ca q_cab b
-q_cab q_cabo o
-q_cabo q_cabou u
 
 q0 q_b b
+
 q_b q_bo o
 q_bo q_bor r
 q_bor q_bora a
@@ -82,15 +202,52 @@ q_bora_cump q_bora_cumpa a
 q_bora_cumpa q_bora_cumpad d
 q_bora_cumpad q_bora_cumpade e
 
-q0 q_s s
-q_s q_si i
-q_si q_sim m
-q_sim q_simb b
-q_simb q_simbo o
-q_simbo q_simbor r
-q_simbor q_simbora a
+
+q0 q_c c
+
+q_c q_ca a
+q_ca q_cab b
+q_cab q_cabo o
+q_cabo q_cabou u
+
+q_ca q_cau u
+q_cau q_caus s
+q_caus q_causo o
+
+
+q_c q_c_ _
+
+q_c_ q_c_n n
+q_c_n q_c_na a
+q_c_na q_c_nao o
+q_c_nao q_c_nao_ _
+q_c_nao_ q_c_nao_c c
+q_c_nao_c q_c_nao_c_ _
+q_c_nao_c_ q_c_nao_c_t t
+q_c_nao_c_t q_c_nao_c_to o
+q_c_nao_c_to q_c_nao_c_to_ _
+q_c_nao_c_to_ q_c_nao_c_to_p p
+q_c_nao_c_to_p q_c_nao_c_to_pe e
+q_c_nao_c_to_pe q_c_nao_c_to_pen n
+q_c_nao_c_to_pen q_c_nao_c_to_pens s
+q_c_nao_c_to_pens q_c_nao_c_to_pensa a
+q_c_nao_c_to_pensa q_c_nao_c_to_pensan n
+q_c_nao_c_to_pensan q_c_nao_c_to_pensanu u
+
+q_c_ q_c_t t
+q_c_t q_c_to o
+q_c_to q_c_to_ _
+q_c_to_ q_c_to_p p
+q_c_to_p q_c_to_pe e
+q_c_to_pe q_c_to_pen n
+q_c_to_pen q_c_to_pens s
+q_c_to_pens q_c_to_pensa a
+q_c_to_pensa q_c_to_pensan n
+q_c_to_pensan q_c_to_pensanu u
+
 
 q0 q_f f
+
 q_f q_fi i
 q_fi q_fic c
 q_fic q_fica a
@@ -106,3 +263,100 @@ q_fica_assim_e q_fica_assim_en n
 q_fica_assim_en q_fica_assim_ent t
 q_fica_assim_ent q_fica_assim_enta a
 q_fica_assim_enta q_fica_assim_entao o
+
+q_fi q_fim m
+q_fim q_fim_ _
+q_fim_ q_fim_d d
+q_fim_d q_fim_do o
+q_fim_do q_fim_do_ _
+q_fim_do_ q_fim_do_c c
+q_fim_do_c q_fim_do_ca a
+q_fim_do_ca q_fim_do_cau u
+q_fim_do_cau q_fim_do_caus s
+q_fim_do_caus q_fim_do_causo o
+
+
+q0 q_o o
+
+q_o q_oi i
+q_oi q_oia a
+q_oia q_oia_ _
+q_oia_ q_oia_p p
+q_oia_p q_oia_pr r
+q_oia_pr q_oia_pro o
+q_oia_pro q_oia_proc c
+q_oia_proc q_oia_proce e
+q_oia_proce q_oia_proce_ _
+q_oia_proce_ q_oia_proce_v v
+q_oia_proce_v q_oia_proce_ve e
+
+
+q0 q_s s
+
+q_s q_si i
+q_si q_sim m
+q_sim q_simb b
+q_simb q_simbo o
+q_simbo q_simbor r
+q_simbor q_simbora a
+
+
+q0 q_t t
+
+q_t q_tr r
+q_tr q_tre e
+q_tre q_trem m
+q_trem q_trem_ _
+
+q_trem_ q_trem_c c
+q_trem_c q_trem_cu u
+q_trem_cu q_trem_cum m
+q_trem_cum q_trem_cum_ _
+q_trem_cum_ q_trem_cum_v v
+q_trem_cum_v q_trem_cum_vi i
+q_trem_cum_vi q_trem_cum_vir r
+q_trem_cum_vir q_trem_cum_virg g
+q_trem_cum_virg q_trem_cum_virgu u
+q_trem_cum_virgu q_trem_cum_virgul l
+q_trem_cum_virgul q_trem_cum_virgula a
+
+q_trem_ q_trem_d d
+q_trem_d q_trem_di i
+q_trem_di q_trem_dis s
+q_trem_dis q_trem_disc c
+
+q_trem_disc q_trem_disco o
+q_trem_disco q_trem_discol l
+q_trem_discol q_trem_discolh h
+q_trem_discolh q_trem_discolhe e
+
+q_trem_disc q_trem_discr r
+q_trem_discr q_trem_discri i
+q_trem_discri q_trem_discrit t
+q_trem_discrit q_trem_discrita a
+
+q_trem_di q_trem_di_ _
+q_trem_di_ q_trem_di_n n
+q_trem_di_n q_trem_di_nu u
+q_trem_di_nu q_trem_di_num m
+q_trem_di_num q_trem_di_nume e
+q_trem_di_nume q_trem_di_numer r
+q_trem_di_numer q_trem_di_numero o
+
+q_tr q_tro o
+q_tro q_tros s
+q_tros q_tross s
+q_tross q_trosso o
+
+
+q0 q_u u
+
+q_u q_ua a
+q_ua q_uai i
+
+
+q0 q_x x
+
+q_x q_xo o
+q_xo q_xov v
+q_xov q_xove e 

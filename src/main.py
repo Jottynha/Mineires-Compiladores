@@ -48,12 +48,7 @@ def main() -> int:
         file.write(
         f"- Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}\n"
         )
-
-    
     return 0
-
-
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

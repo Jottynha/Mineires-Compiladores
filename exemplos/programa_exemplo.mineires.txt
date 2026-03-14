@@ -1,6 +1,20 @@
+c_nao
+c_to_pensanu
+c_nao_c_to_pensanu
 bora_cumpade 
 simbora
 a fica_assim_entao 2 uai
 uai
 cabou
+xove
 int
+
+oia_proce_ve 
+causo 
+fim_do_causo 
+simbora 
+trem_di_numero 
+trem_cum_virgula 
+trem_discrita 
+trem_discolhe 
+trosso
