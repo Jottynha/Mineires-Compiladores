@@ -1,0 +1,17 @@
+Tokens identificados: 10
+
+Tokens (tupla):
+('bora_cumpade', 'MAIN', 1, 1)
+('simbora', 'BEGIN_BLOCK', 2, 1)
+('a', 'IDENTIFIER', 3, 1)
+('fica_assim_entao', 'ASSIGN', 3, 3)
+('2', 'NUMBER_INT', 3, 20)
+('uai', 'SEMICOLON', 3, 22)
+('uai', 'SEMICOLON', 4, 1)
+('cabou', 'END_BLOCK', 5, 1)
+('int', 'ERROR', 6, 1)
+('EOF', 'EOF', 6, 4)
+
+Resumo:
+- Identificados: 10
+- Não identificados: 1
