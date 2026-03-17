@@ -11,10 +11,10 @@ class EstadoTipo(Enum):
 class Automato:
     def __init__(self, nome: str = "Automato"):
         self.nome = nome
-        self.estado_inicial: Optional[str] = None
-        self.estados: dict[str, EstadoTipo] = {}
-        self.token_por_estado: dict[str, Any] = {}
-        self.transicoes_char: dict[str, dict[str, str]] = {}
+        self.estado_inicial: Optional[str] = None # string || None
+        self.estados: dict[str, EstadoTipo] = {} 
+        self.token_por_estado: dict[str, Any] = {} # tokens a estados relevantes
+        self.transicoes_char: dict[str, dict[str, str]] = {} # origem -> (caractere -> destino)
     def adicionar_estado(
         self,
         nome: str,
@@ -26,7 +26,7 @@ class Automato:
             self.token_por_estado[nome] = token_type
         if tipo == EstadoTipo.INICIAL:
             self.estado_inicial = nome
-        self.transicoes_char.setdefault(nome, {})
+        self.transicoes_char.setdefault(nome, {}) #declaração em caso de não existir, para evitar erros depois
         return self
     def adicionar_transicao(
         self,
