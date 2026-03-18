@@ -30,7 +30,7 @@ def main() -> int:
     print(f"Tokens identificados: {len(tokens_identificados)}")
     print("\nTokens (tupla):")
     for token in tokens_identificados:
-        print((token.lexema, token.tipo.name, token.linha, token.coluna))
+        print((token.lexema, token.tipo.value, token.linha, token.coluna)) # imprimindo valores do TokenType ao inves do nome associado
     print("\nResumo:")
     print(f"- Identificados: {len(tokens_identificados)}")
     print(f"- Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}")
