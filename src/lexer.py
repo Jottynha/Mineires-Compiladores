@@ -26,6 +26,7 @@ class Lexer:
         self.linha: int = 1
         self.coluna: int = 1
         self.tokens: List[Token] = []
+        self._delimitadores_numero = set(' \t\r\n,;(){}[]<>!=+-*/%\"\'')
     def carregar_arquivo(self, caminho: str) -> None:
         with open(caminho, 'r', encoding='utf-8') as f:
             self.codigo = f.read()
@@ -141,6 +142,37 @@ class Lexer:
         while self._char_atual() is not None and self._char_atual() not in ' \t\r\n':
             lexema_invalido += self._avancar() or ""
         return lexema_invalido
+    def _consumir_numero_malformado(self) -> str:
+        lexema = ""
+        while self._char_atual() is not None and self._char_atual() not in self._delimitadores_numero:
+            lexema += self._avancar() or ""
+        return lexema
+    def _validar_numero_malformado(self, token: Token) -> None:
+        if token.tipo not in {
+            TokenType.NUMBER_DECIMAL,
+            TokenType.NUMBER_REAL,
+            TokenType.NUMBER_OCTAL,
+            TokenType.NUMBER_HEX,
+        }:
+            return
+        proximo = self._char_atual()
+        if proximo is None:
+            return
+        if proximo.isalpha() or proximo == '_' or proximo == '.':
+            resto = self._consumir_numero_malformado()
+            raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna)
+    def _consumir_comentario_multilinha(self, linha_inicio: int, coluna_inicio: int) -> Token:
+        while self._char_atual() is not None:
+            self._pular_espacos()
+            if self._char_atual() is None:
+                break
+            token = self._reconhecer_com_automato()
+            if token is None:
+                self._avancar()
+                continue
+            if token.tipo == TokenType.COMMENT_END:
+                return token
+        raise LexicalError("causo", linha_inicio, coluna_inicio)
     def _reconhecer_com_automato(self) -> Optional[Token]:
         if self.automato.estado_inicial is None:
             return None
@@ -205,10 +237,24 @@ class Lexer:
             # Tenta reconhecer com o autômato
             token = self._reconhecer_com_automato()
             if token is not None:
+                if token.tipo == TokenType.COMMENT_START:
+                    self.tokens.append(token)
+                    token_fim = self._consumir_comentario_multilinha(token.linha, token.coluna)
+                    self.tokens.append(token_fim)
+                    continue
+                self._validar_numero_malformado(token)
                 # Ignora tokens de whitespace se necessário
                 if token.tipo != TokenType.WHITESPACE:
                     self.tokens.append(token)
             else:
+                char_atual = self._char_atual()
+                if char_atual is not None and (char_atual.isdigit() or (char_atual == '.' and (self._peek() or '').isdigit())):
+                    numero_invalido = self._consumir_numero_malformado()
+                    if not numero_invalido and self._char_atual() is not None:
+                        numero_invalido = self._avancar() or ""
+                    erro = Token(numero_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
+                    self.tokens.append(erro)
+                    raise LexicalError(erro.lexema, erro.linha, erro.coluna)
                 # Lexema não reconhecido - erro léxico
                 lexema_invalido = self._consumir_lexema_invalido()
                 if not lexema_invalido and self._char_atual() is not None:
@@ -238,9 +284,23 @@ class Lexer:
             coluna_inicio = self.coluna
             token = self._reconhecer_com_automato()
             if token is not None:
+                if token.tipo == TokenType.COMMENT_START:
+                    yield token
+                    token_fim = self._consumir_comentario_multilinha(token.linha, token.coluna)
+                    yield token_fim
+                    continue
+                self._validar_numero_malformado(token)
                 if token.tipo != TokenType.WHITESPACE:
                     yield token
             else:
+                char_atual = self._char_atual()
+                if char_atual is not None and (char_atual.isdigit() or (char_atual == '.' and (self._peek() or '').isdigit())):
+                    numero_invalido = self._consumir_numero_malformado()
+                    if not numero_invalido and self._char_atual() is not None:
+                        numero_invalido = self._avancar() or ""
+                    erro = Token(numero_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
+                    yield erro
+                    raise LexicalError(erro.lexema, erro.linha, erro.coluna)
                 lexema_invalido = self._consumir_lexema_invalido()
                 if not lexema_invalido and self._char_atual() is not None:
                     lexema_invalido = self._avancar() or ""
