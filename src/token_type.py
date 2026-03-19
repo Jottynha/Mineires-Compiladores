@@ -5,90 +5,89 @@ from enum import Enum, auto
 
 class TokenType(Enum):
     # = Condicionais =
-    IF = auto()                 # c_to_pensanu
-    ELSE = auto()               # c_nao
-    ELIF = auto()               # c_nao_c_to_pensanu
-
-    # = Laços =
-    FOR = auto()                # roda_esse_trem
-    WHILE = auto()              # enquanto_tiver_trem
-    
-    # = Switch/Case =
+    IF = auto()                 # uai_se
+    ELSE = auto()               # uai_senao
     SWITCH = auto()             # dependenu
     CASE = auto()               # du_casu
-    
-    # = Fluxo =
-    RETURN = auto()             # ta_bao
+
+    # = Repetição =
+    FOR = auto()                # roda_esse_trem
+    WHILE = auto()              # enquanto_tiver_trem
     BREAK = auto()              # para_o_trem
     CONTINUE = auto()           # toca_o_trem
-    
-    # = Main =
+
+    # = Funções e Retorno =
     MAIN = auto()               # bora_cumpade
-    
+    RETURN = auto()             # ta_bao
+
+    # = Entrada e Saída =
+    INPUT = auto()              # xove
+    OUTPUT = auto()             # oia_proce_ve
+
+    # = Comentários =
+    COMMENT_LINE = auto()       # //
+    COMMENT_START = auto()      # causo -> início de comentário multilinha
+    COMMENT_END = auto()        # fim_do_causo -> fim de comentário multilinha
+
     # = Tipos de Dados =
     INT = auto()                # trem_di_numeru
     FLOAT = auto()              # trem_cum_virgula
     STRING = auto()             # trem_discrita
     BOOLEAN = auto()            # trem_discolhe
     CHAR = auto()               # trosso
-    
-    # = Booleanos =
-    TRUE = auto()               # certin
-    FALSE = auto()              # erradin
-    
-    # = Sintaxe =
+
+    # = Blocos e Símbolos =
     BEGIN_BLOCK = auto()        # simbora
     END_BLOCK = auto()          # cabou
-    
-    # = Delimitadores =
     LBRACE = auto()             # {
     RBRACE = auto()             # }
     LPAREN = auto()             # (
     RPAREN = auto()             # )
-    SEMICOLON = auto()          # uai -> ;
+    QUOTE = auto()              # ""
+    LSINGLE_QUOTE = auto()      # .'
+    RSINGLE_QUOTE = auto()      # '.
+    SEMICOLON = auto()          # uai (;)
     COMMA = auto()              # ,
-    QUOTE = auto()              # "
-    SINGLE_QUOTE = auto()       # .'. -> '
-    
+
     # = Operadores Relacionais =
+    EQUAL = auto()              # mema_coisa (==)
+    NOT_EQUAL = auto()          # neh_nada (!=)
+    ASSIGN = auto()             # fica_assim_entao (=)
     LESS = auto()               # <
     GREATER = auto()            # >
     LESS_EQUAL = auto()         # <=
     GREATER_EQUAL = auto()      # >=
-    ASSIGN = auto()             # fica_assim_entao -> =
-    NOT_EQUAL = auto()          # neh_nada -> !=
-    EQUAL = auto()              # mema_coisa -> ==
     
     # = Operadores Lógicos =
-    OR = auto()                 # quarque_um -> or
-    NOT = auto()                # vam_marca -> not
-    AND = auto()                # tamem -> and
-    XOR = auto()                # um_o_oto -> xor
-    
+    OR = auto()                 # quarque_um 
+    AND = auto()                # tamem
+    NOT = auto()                # vam_marca 
+    XOR = auto()                # um_o_oto 
+
+    # = Booleanos =
+    TRUE = auto()               # eh
+    FALSE = auto()              # num_eh
+
     # = Operadores Aritméticos =
     PLUS = auto()               # +'
     MINUS = auto()              # -'
-    MULTIPLY = auto()           # veiz -> *
-    DIVIDE = auto()             # sob -> /
+    MULTIPLY = auto()           # veiz (*)
+    DIVIDE = auto()             # sob (/)
     MODULO = auto()             # %
-    INT_DIVIDE = auto()         # / (divisão inteira)    
-    
-    # = Entrada e Saída =
-    INPUT = auto()              # xove
-    OUTPUT = auto()             # oia_proce_ve (print)
-    
-    # = Comentários =
-    COMMENT_LINE = auto()       # //
-    COMMENT_START = auto()      # causo -> início de comentário multilinha
-    COMMENT_END = auto()        # fim_do_causo -> fim de comentário multilinha
-    
-    # = Literais =
-    NUMBER_INT = auto()         # números inteiros: 0, 10, 32
-    NUMBER_FLOAT = auto()       # números reais: 3.14, .92, 0.33
-    NUMBER_OCTAL = auto()       # números octais: 01, 07, 017
-    NUMBER_HEX = auto()         # números hexadecimais: 0x10F
+    INT_DIVIDE = auto()         # / (divisão inteira)
+
+    # = Bases Numéricas =
+    NUMBER_REAL = auto()        # numeros reais (floats)
+    NUMBER_DECIMAL = auto()     # numeros decimais (ints)
+    NUMBER_OCTAL = auto()       # numeros octais
+    NUMBER_HEX = auto()         # numeros hexadecimais
+
+    # = Strings =
     STRING_LITERAL = auto()     # strings entre ""
     CHAR_LITERAL = auto()       # caractere entre .'. .'.
+    ESCAPE_NEWLINE = auto()     # quebra de linha
+    ESCAPE_TAB = auto()         # tab
+    ESCAPE_QUOTE = auto()       # aspas escapadas
     
     # = Identificadores =
     IDENTIFIER = auto()         
@@ -102,60 +101,81 @@ class TokenType(Enum):
 # Mapeamento de palavras reservadas para os tokens
 RESERVED_WORDS = {
     # Condicionais
-    "c_to_pensanu": TokenType.IF,
-    "c_nao": TokenType.ELSE,
-    "c_nao_c_to_pensanu": TokenType.ELIF,   
+    "uai_se": TokenType.IF,
+    "uai_senao": TokenType.ELSE,
+    "dependenu": TokenType.SWITCH,
+    "du_casu": TokenType.CASE,   
     
-    # Laços
+    # Repetição
     "roda_esse_trem": TokenType.FOR,
     "enquanto_tiver_trem": TokenType.WHILE,
-    
-    # Switch/Case
-    "dependenu": TokenType.SWITCH,
-    "du_casu": TokenType.CASE,
-    
-    # Controle de Fluxo
-    "ta_bao": TokenType.RETURN,
     "para_o_trem": TokenType.BREAK,
     "toca_o_trem": TokenType.CONTINUE,
-    
-    # Função Principal
+
+    # Funções e Retorno
     "bora_cumpade": TokenType.MAIN,
-    
+    "ta_bao": TokenType.RETURN,
+
+    # Entrada/Saída
+    "xove": TokenType.INPUT,
+    "oia_proce_ve": TokenType.OUTPUT,
+
+    # Comentários
+    "//": TokenType.COMMENT_LINE,
+    "causo": TokenType.COMMENT_START,
+    "fim_do_causo": TokenType.COMMENT_END,
+
     # Tipos de Dados
     "trem_di_numeru": TokenType.INT,
     "trem_cum_virgula": TokenType.FLOAT,
     "trem_discrita": TokenType.STRING,
     "trem_discolhe": TokenType.BOOLEAN,
     "trosso": TokenType.CHAR,
-    
-    # Valores Booleanos
-    "certin": TokenType.TRUE,
-    "eradin": TokenType.FALSE,
-    
-    # Escopo
+
+    # Blocos e Símbolos
     "simbora": TokenType.BEGIN_BLOCK,
-    "cabou": TokenType.END_BLOCK,  # cabô sem acento para facilitar
-    
-    # Operadores
-    "fica_assim_entao": TokenType.ASSIGN,
-    "neh_nada": TokenType.NOT_EQUAL,
+    "cabou": TokenType.END_BLOCK,
+    "{": TokenType.LBRACE,
+    "}": TokenType.RBRACE,
+    "(": TokenType.LPAREN,
+    ")": TokenType.RPAREN,
+    # descobrir como fazer aspas
+    ".'": TokenType.LSINGLE_QUOTE,
+    "'.": TokenType.RSINGLE_QUOTE,
+    "uai": TokenType.SEMICOLON,
+    ",": TokenType.COMMA,
+
+    # Operadores Relacionais
     "mema_coisa": TokenType.EQUAL,
+    "neh_nada": TokenType.NOT_EQUAL,
+    "fica_assim_entao": TokenType.ASSIGN,
+    "<": TokenType.LESS,
+    ">": TokenType.GREATER,
+    "<=": TokenType.LESS_EQUAL,
+    ">=": TokenType.GREATER_EQUAL,
+
+    # Operadoeres Lógicos
     "quarque_um": TokenType.OR,
-    "vam_marca": TokenType.NOT,
     "tamem": TokenType.AND,
+    "vam_marca": TokenType.NOT,
     "um_o_oto": TokenType.XOR,
+
+    # Operadores Booleanos
+    "eh": TokenType.TRUE,
+    "num_eh": TokenType.FALSE,
+    
+    # Operadores Aritméticos
+    "+'": TokenType.PLUS,
+    "-'": TokenType.MINUS,
     "veiz": TokenType.MULTIPLY,
     "sob": TokenType.DIVIDE,
-    
-    # Entrada/Saída
-    "xove": TokenType.INPUT,
-    "oia_proce_ve": TokenType.OUTPUT,
-    
-    # Comentários
-    "causo": TokenType.COMMENT_START,
-    "fim_do_causo": TokenType.COMMENT_END,
-    
-    # Delimitadores
-    "uai": TokenType.SEMICOLON,
+    "%": TokenType.MODULO,
+    "/": TokenType.INT_DIVIDE,
+
+    # Bases Numéricas: (descobrir como fazer)
+
+    # Strings: (descobrir como fazer o resto)
+    "\n": TokenType.ESCAPE_NEWLINE,
+    "\t": TokenType.ESCAPE_TAB,
+    "\"": TokenType.ESCAPE_QUOTE
 }

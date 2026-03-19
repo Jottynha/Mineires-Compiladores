@@ -4,7 +4,30 @@
 
 [ESTADOS]
 q0 INICIAL
-q_2 FINAL NUMBER_INT
+
+q_// FINAL IDENTIFIER
+q_{ FINAL IDENTIFIER
+q_} FINAL IDENTIFIER
+q_( FINAL IDENTIFIER
+q_) FINAL IDENTIFIER
+q_. FINAL IDENTIFIER
+q_' FINAL IDENTIFIER
+q_.' FINAL IDENTIFIER
+q_'. FINAL IDENTIFIER
+q_, FINAL IDENTIFIER
+q_< FINAL IDENTIFIER
+q_> FINAL IDENTIFIER
+q_<= FINAL IDENTIFIER
+q_>= FINAL IDENTIFIER
+q_+ FINAL IDENTIFIER
+q_- FINAL IDENTIFIER
+q_% FINAL IDENTIFIER
+q_/ FINAL IDENTIFIER
+q_\ INTERMEDIARIO
+q_\n FINAL IDENTIFIER
+q_\t FINAL IDENTIFIER
+q_\" FINAL IDENTIFIER 
+
 q_a FINAL IDENTIFIER
 q_b INTERMEDIARIO
 q_bo INTERMEDIARIO
@@ -19,33 +42,6 @@ q_bora_cumpa INTERMEDIARIO
 q_bora_cumpad INTERMEDIARIO
 q_bora_cumpade FINAL IDENTIFIER
 q_c INTERMEDIARIO
-q_c_ INTERMEDIARIO
-q_c_n INTERMEDIARIO
-q_c_na INTERMEDIARIO
-q_c_nao FINAL IDENTIFIER
-q_c_nao_ INTERMEDIARIO
-q_c_nao_c INTERMEDIARIO
-q_c_nao_c_ INTERMEDIARIO
-q_c_nao_c_t INTERMEDIARIO
-q_c_nao_c_to INTERMEDIARIO
-q_c_nao_c_to_ INTERMEDIARIO
-q_c_nao_c_to_p INTERMEDIARIO
-q_c_nao_c_to_pe INTERMEDIARIO
-q_c_nao_c_to_pen INTERMEDIARIO
-q_c_nao_c_to_pens INTERMEDIARIO
-q_c_nao_c_to_pensa INTERMEDIARIO
-q_c_nao_c_to_pensan INTERMEDIARIO
-q_c_nao_c_to_pensanu FINAL IDENTIFIER
-q_c_t INTERMEDIARIO
-q_c_to INTERMEDIARIO
-q_c_to_ INTERMEDIARIO
-q_c_to_p INTERMEDIARIO
-q_c_to_pe INTERMEDIARIO
-q_c_to_pen INTERMEDIARIO
-q_c_to_pens INTERMEDIARIO
-q_c_to_pensa INTERMEDIARIO
-q_c_to_pensan INTERMEDIARIO
-q_c_to_pensanu FINAL IDENTIFIER
 q_ca INTERMEDIARIO
 q_cab INTERMEDIARIO
 q_cabo INTERMEDIARIO
@@ -74,6 +70,7 @@ q_du_ca INTERMEDIARIO
 q_du_cas INTERMEDIARIO
 q_du_casu FINAL IDENTIFIER
 q_e INTERMEDIARIO
+q_eh FINAL IDENTIFIER
 q_en INTERMEDIARIO
 q_enq INTERMEDIARIO
 q_enqu INTERMEDIARIO
@@ -141,6 +138,11 @@ q_neh_n INTERMEDIARIO
 q_neh_na INTERMEDIARIO
 q_neh_nad INTERMEDIARIO
 q_neh_nada FINAL IDENTIFIER
+q_nu INTERMEDIARIO
+q_num INTERMEDIARIO
+q_num_ INTERMEDIARIO
+q_num_e INTERMEDIARIO
+q_num_eh FINAL IDENTIFIER
 q_o INTERMEDIARIO
 q_oi INTERMEDIARIO
 q_oia INTERMEDIARIO
@@ -257,6 +259,12 @@ q_trosso FINAL IDENTIFIER
 q_u INTERMEDIARIO
 q_ua INTERMEDIARIO
 q_uai FINAL IDENTIFIER
+q_uai_ INTERMEDIARIO
+q_uai_s INTERMEDIARIO
+q_uai_se FINAL IDENTIFIER
+q_uai_sen INTERMEDIARIO
+q_uai_sena INTERMEDIARIO
+q_uai_senao FINAL IDENTIFIER
 q_um INTERMEDIARIO
 q_um_ INTERMEDIARIO
 q_um_o INTERMEDIARIO
@@ -282,7 +290,30 @@ q_xov INTERMEDIARIO
 q_xove FINAL IDENTIFIER
 
 [TRANSICOES]
-q0 q_2 2
+q0 q_/ /
+q_/ q_// /
+q0 q_{ {
+q0 q_} }
+q0 q_( (
+q0 q_) )
+q0 q_. .
+q_. q_.' '
+q0 q_' '
+q_' q_'. .
+q0 q_, ,
+q0 q_< <
+q0 q_> >
+q_< q_<= =
+q_> q_>= =
+q0 q_+ +
+q0 q_- -
+q0 q_% %
+q0 q_/ /
+q0 q_\ \
+q_\ q_\n n
+q_\ q_\t t
+q_\ q_\" "
+
 q0 q_a a
 q0 q_b b
 q0 q_c c
@@ -311,45 +342,13 @@ q_bora_cum q_bora_cump p
 q_bora_cump q_bora_cumpa a
 q_bora_cumpa q_bora_cumpad d
 q_bora_cumpad q_bora_cumpade e
-q_c q_c_ _
 q_c q_ca a
-q_c q_ce e
-q_c_ q_c_n n
-q_c_ q_c_t t
-q_c_n q_c_na a
-q_c_na q_c_nao o
-q_c_nao q_c_nao_ _
-q_c_nao_ q_c_nao_c c
-q_c_nao_c q_c_nao_c_ _
-q_c_nao_c_ q_c_nao_c_t t
-q_c_nao_c_t q_c_nao_c_to o
-q_c_nao_c_to q_c_nao_c_to_ _
-q_c_nao_c_to_ q_c_nao_c_to_p p
-q_c_nao_c_to_p q_c_nao_c_to_pe e
-q_c_nao_c_to_pe q_c_nao_c_to_pen n
-q_c_nao_c_to_pen q_c_nao_c_to_pens s
-q_c_nao_c_to_pens q_c_nao_c_to_pensa a
-q_c_nao_c_to_pensa q_c_nao_c_to_pensan n
-q_c_nao_c_to_pensan q_c_nao_c_to_pensanu u
-q_c_t q_c_to o
-q_c_to q_c_to_ _
-q_c_to_ q_c_to_p p
-q_c_to_p q_c_to_pe e
-q_c_to_pe q_c_to_pen n
-q_c_to_pen q_c_to_pens s
-q_c_to_pens q_c_to_pensa a
-q_c_to_pensa q_c_to_pensan n
-q_c_to_pensan q_c_to_pensanu u
 q_ca q_cab b
-q_ca q_cau u
 q_cab q_cabo o
 q_cabo q_cabou u
+q_ca q_cau u
 q_cau q_caus s
 q_caus q_causo o
-q_ce q_cer r
-q_cer q_cert t
-q_cert q_certi i
-q_certi q_certin n
 q_d q_de e
 q_d q_du u
 q_de q_dep p
@@ -364,6 +363,7 @@ q_du_ q_du_c c
 q_du_c q_du_ca a
 q_du_ca q_du_cas s
 q_du_cas q_du_casu u
+q_e q_eh h
 q_e q_en n
 q_e q_er r
 q_en q_enq q
@@ -383,10 +383,6 @@ q_enquanto_tiver_ q_enquanto_tiver_t t
 q_enquanto_tiver_t q_enquanto_tiver_tr r
 q_enquanto_tiver_tr q_enquanto_tiver_tre e
 q_enquanto_tiver_tre q_enquanto_tiver_trem m
-q_er q_era a
-q_era q_erad d
-q_erad q_eradi i
-q_eradi q_eradin n
 q_f q_fi i
 q_fi q_fic c
 q_fi q_fim m
@@ -428,6 +424,11 @@ q_neh_ q_neh_n n
 q_neh_n q_neh_na a
 q_neh_na q_neh_nad d
 q_neh_nad q_neh_nada a
+q_n q_nu u
+q_nu q_num m
+q_num q_num_ _
+q_num_ q_num_e e
+q_num_e q_num_eh h
 q_o q_oi i
 q_oi q_oia a
 q_oia q_oia_ _
@@ -538,6 +539,12 @@ q_tross q_trosso o
 q_u q_ua a
 q_u q_um m
 q_ua q_uai i
+q_uai q_uai_ _
+q_uai_ q_uai_s s
+q_uai_s q_uai_se e
+q_uai_se q_uai_sen n
+q_uai_sen q_uai_sena a
+q_uai_sena q_uai_senao o
 q_um q_um_ _
 q_um_ q_um_o o
 q_um_o q_um_o_ _
