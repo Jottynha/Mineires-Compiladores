@@ -1,5 +1,4 @@
-uai_se
-uai_senao
+uai_se;uai_senao
 dependenu
 du_casu
 roda_esse_trem

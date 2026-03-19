@@ -4,6 +4,16 @@ from automato import Automato
 from token_type import TokenType, RESERVED_WORDS
 from mineires_token import Token
 
+
+class LexicalError(Exception):
+    def __init__(self, lexema: str, linha: int, coluna: int):
+        self.lexema = lexema
+        self.linha = linha
+        self.coluna = coluna
+        super().__init__(
+            f"Erro léxico: string '{lexema}' não reconhecida na linha {linha}, coluna {coluna}"
+        )
+
 class Lexer:
     def __init__(self, automato: Automato, mostrar_erros: bool = True):
         # inicializa o Lexer com um autômato.
@@ -122,11 +132,11 @@ class Lexer:
             else:
                 # Lexema não reconhecido - erro léxico
                 lexema_invalido = self._consumir_lexema_invalido()
+                if not lexema_invalido and self._char_atual() is not None:
+                    lexema_invalido = self._avancar() or ""
                 erro = Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
                 self.tokens.append(erro)
-                if self.mostrar_erros:
-                    print(f"Erro léxico: string '{lexema_invalido}' não reconhecida "
-                          f"na linha {linha_inicio}, coluna {coluna_inicio}")
+                raise LexicalError(erro.lexema, erro.linha, erro.coluna)
         # Adiciona token de fim de arquivo
         self.tokens.append(Token("EOF", TokenType.EOF, self.linha, self.coluna))
         return self.tokens
@@ -143,7 +153,11 @@ class Lexer:
                     yield token
             else:
                 lexema_invalido = self._consumir_lexema_invalido()
-                yield Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
+                if not lexema_invalido and self._char_atual() is not None:
+                    lexema_invalido = self._avancar() or ""
+                erro = Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
+                yield erro
+                raise LexicalError(erro.lexema, erro.linha, erro.coluna)
         yield Token("EOF", TokenType.EOF, self.linha, self.coluna)    
     def imprimir_tokens(self) -> None:
         print("\n" + "=" * 70)

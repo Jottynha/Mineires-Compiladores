@@ -139,16 +139,21 @@ RESERVED_WORDS = {
     "}": TokenType.RBRACE,
     "(": TokenType.LPAREN,
     ")": TokenType.RPAREN,
+    '"': TokenType.QUOTE,
     # descobrir como fazer aspas
     ".'": TokenType.LSINGLE_QUOTE,
     "'.": TokenType.RSINGLE_QUOTE,
     "uai": TokenType.SEMICOLON,
+    ";": TokenType.SEMICOLON,
     ",": TokenType.COMMA,
 
     # Operadores Relacionais
     "mema_coisa": TokenType.EQUAL,
+    "==": TokenType.EQUAL,
     "neh_nada": TokenType.NOT_EQUAL,
+    "!=": TokenType.NOT_EQUAL,
     "fica_assim_entao": TokenType.ASSIGN,
+    "=": TokenType.ASSIGN,
     "<": TokenType.LESS,
     ">": TokenType.GREATER,
     "<=": TokenType.LESS_EQUAL,
@@ -158,6 +163,7 @@ RESERVED_WORDS = {
     "quarque_um": TokenType.OR,
     "tamem": TokenType.AND,
     "vam_marca": TokenType.NOT,
+    "!": TokenType.NOT,
     "um_o_oto": TokenType.XOR,
 
     # Operadores Booleanos
@@ -167,7 +173,9 @@ RESERVED_WORDS = {
     # Operadores Aritméticos
     "+'": TokenType.PLUS,
     "-'": TokenType.MINUS,
+    "-": TokenType.MINUS,
     "veiz": TokenType.MULTIPLY,
+    "*": TokenType.MULTIPLY,
     "sob": TokenType.DIVIDE,
     "%": TokenType.MODULO,
     "/": TokenType.INT_DIVIDE,
@@ -175,7 +183,7 @@ RESERVED_WORDS = {
     # Bases Numéricas: (descobrir como fazer)
 
     # Strings: (descobrir como fazer o resto)
-    "\n": TokenType.ESCAPE_NEWLINE,
-    "\t": TokenType.ESCAPE_TAB,
-    "\"": TokenType.ESCAPE_QUOTE
+    "\\n": TokenType.ESCAPE_NEWLINE,
+    "\\t": TokenType.ESCAPE_TAB,
+    "\\\"": TokenType.ESCAPE_QUOTE
 }

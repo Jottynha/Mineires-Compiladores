@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 from automato import construir_automato
-from lexer import Lexer
+from lexer import Lexer, LexicalError
 from token_type import TokenType
 
 def main() -> int:
@@ -17,7 +17,11 @@ def main() -> int:
     automato = construir_automato()
     lexer = Lexer(automato, mostrar_erros=True)
     lexer.carregar_arquivo(caminho_arquivo)
-    tokens_identificados = lexer.analisar()
+    try:
+        tokens_identificados = lexer.analisar()
+    except LexicalError as erro_lexico:
+        print(str(erro_lexico))
+        return 1
     
     # bom tratamento mas deixei pra ver TODOS os tokens por enquanto
     #tokens_identificados = [
