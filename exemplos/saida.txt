@@ -1,4 +1,4 @@
-Tokens identificados: 55
+Tokens identificados: 59
 
 Tokens (tupla):
 ('uai_se', 'IF', 1, 1)
@@ -55,8 +55,12 @@ Tokens (tupla):
 ('\\n', 'ESCAPE_NEWLINE', 50, 1)
 ('\\t', 'ESCAPE_TAB', 51, 1)
 ('\\"', 'ESCAPE_QUOTE', 52, 1)
-('EOF', 'EOF', 52, 3)
+('000', 'NUMBER_DECIMAL', 53, 1)
+('.50', 'NUMBER_REAL', 54, 1)
+('01', 'NUMBER_OCTAL', 55, 1)
+('0x10F', 'NUMBER_HEX', 56, 1)
+('EOF', 'EOF', 56, 6)
 
 Resumo:
-- Identificados: 55
+- Identificados: 59
 - Não identificados: 0
