@@ -66,6 +66,75 @@ class Lexer:
     def _pular_espacos(self) -> None:
         while self._char_atual() is not None and self._char_atual() in ' \t\r\n':
             self._avancar()
+    def _reconhecer_string(self) -> Optional[Token]:
+        # reconhece string entre aspas duplas com suporte a escapes
+        if self._char_atual() != '"':
+            return None
+        linha_inicio = self.linha
+        coluna_inicio = self.coluna
+        self._avancar()  # consome a aspas inicial
+        lexema = '"'
+        while self._char_atual() is not None:
+            char = self._char_atual()
+            if char == '\\':
+                # Escape sequence
+                lexema += self._avancar() or ""
+                proximo = self._char_atual()
+                if proximo in 'ntr"\\':
+                    lexema += self._avancar() or ""
+                else:
+                    raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            elif char == '"':
+                # Fim da string
+                lexema += self._avancar() or ""
+                return Token(lexema, TokenType.STRING_LITERAL, linha_inicio, coluna_inicio)
+            elif char == '\n':
+                # Quebra de linha dentro de string é erro
+                raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            else:
+                lexema += self._avancar() or ""
+        # String não fechada
+        raise LexicalError(lexema, linha_inicio, coluna_inicio)
+    def _reconhecer_char(self) -> Optional[Token]:
+        # reconhece char único entre aspas simples
+        if self._char_atual() != "'":
+            return None
+        linha_inicio = self.linha
+        coluna_inicio = self.coluna
+        # Peek ahead para ver se é um char válido
+        if self._peek(1) is None:
+            return None
+        proximo_char = self._peek(1)
+        # Se for .' ou '. sozinhos, deixa o AFD tratar
+        if proximo_char == '.' or (proximo_char == "'" and self._peek(2) != '.'):
+            return None
+        
+        self._avancar()  # consome a aspas inicial
+        lexema = "'"
+        # Primeiro caractere (pode ser escape)
+        char = self._char_atual()
+        if char is None:
+            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+        if char == '\\':
+            # Escape sequence
+            lexema += self._avancar() or ""
+            proximo = self._char_atual()
+            if proximo not in 'ntr"\\':
+                raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            lexema += self._avancar() or ""
+        elif char == "'":
+            # Char vazio
+            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+        elif char == '\n':
+            # Quebra de linha dentro de char é erro
+            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+        else:
+            lexema += self._avancar() or ""
+        # Deve ter aspas simples de fechamento
+        if self._char_atual() != "'":
+            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+        lexema += self._avancar() or ""
+        return Token(lexema, TokenType.CHAR_LITERAL, linha_inicio, coluna_inicio)
     def _consumir_lexema_invalido(self) -> str:
         # consome um trecho inválido contínuo até espaço em branco ou fim
         lexema_invalido = ""
@@ -121,6 +190,16 @@ class Lexer:
             self._pular_espacos()
             if self._char_atual() is None:
                 break
+            # Tenta reconhecer string
+            token_string = self._reconhecer_string()
+            if token_string is not None:
+                self.tokens.append(token_string)
+                continue
+            # Tenta reconhecer char
+            token_char = self._reconhecer_char()
+            if token_char is not None:
+                self.tokens.append(token_char)
+                continue
             linha_inicio = self.linha
             coluna_inicio = self.coluna
             # Tenta reconhecer com o autômato
@@ -145,6 +224,16 @@ class Lexer:
             self._pular_espacos()
             if self._char_atual() is None:
                 break
+            # Tenta reconhecer string
+            token_string = self._reconhecer_string()
+            if token_string is not None:
+                yield token_string
+                continue
+            # Tenta reconhecer char
+            token_char = self._reconhecer_char()
+            if token_char is not None:
+                yield token_char
+                continue
             linha_inicio = self.linha
             coluna_inicio = self.coluna
             token = self._reconhecer_com_automato()
