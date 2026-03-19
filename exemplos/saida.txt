@@ -64,3 +64,25 @@ Tokens (tupla):
 Resumo:
 - Identificados: 59
 - Não identificados: 0
+
+======================================================================
+RELATÓRIO DE PERFORMANCE - ANÁLISE LÉXICA
+======================================================================
+Tempo total:            2.30 ms
+Caracteres processados: 380
+Tamanho do código:      441 bytes
+Tamanho de tokens:      2,784 bytes
+
+TOKENS POR TIPO:
+  - AFD:              51
+  - STRING_LITERAL:   0
+  - CHAR_LITERAL:     0
+  - NUMBER_*:         4
+  - IDENTIFIER:       2
+  - Total:            57
+  - Erros:            0
+
+Taxas:
+  - Tokens/segundo:   24,836
+  - Chars/segundo:    165,576
+======================================================================

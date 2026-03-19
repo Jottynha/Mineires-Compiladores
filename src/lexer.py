@@ -1,5 +1,7 @@
 # analisador léxico para mineires.
 from typing import List, Optional, Generator
+import time
+import sys
 from automato import Automato
 from token_type import TokenType, RESERVED_WORDS
 from mineires_token import Token
@@ -15,18 +17,33 @@ class LexicalError(Exception):
         )
 
 class Lexer:
-    def __init__(self, automato: Automato, mostrar_erros: bool = True):
+    def __init__(self, automato: Automato, mostrar_erros: bool = True, profile: bool = False):
         # inicializa o Lexer com um autômato.
         # args: automato: Autômato configurado para reconhecer tokens
         #       mostrar_erros: Se True, imprime erros léxicos no terminal
+        #       profile: Se True, coleta estatísticas de performance
         self.automato = automato
         self.mostrar_erros = mostrar_erros
+        self.profile = profile
         self.codigo: str = ""
         self.posicao: int = 0
         self.linha: int = 1
         self.coluna: int = 1
         self.tokens: List[Token] = []
-        self._delimitadores_numero = set(' \t\r\n,;(){}[]<>!=+-*/%\"\'')
+        self._delimitadores_numero = set(' \t\r\n,;(){}[]<>!=+-*/%"\'')
+        
+        # Contadores de profiling
+        self._tempo_inicio: Optional[float] = None
+        self._tempo_fim: Optional[float] = None
+        self._contagem_caracteres_processados: int = 0
+        self._contagem_tokens_afd: int = 0
+        self._contagem_tokens_string: int = 0
+        self._contagem_tokens_char: int = 0
+        self._contagem_tokens_numero: int = 0
+        self._contagem_tokens_identificador: int = 0
+        self._contagem_erros: int = 0
+        self._tamanho_codigo_bytes: int = 0
+        self._tamanho_tokens_bytes: int = 0
     def carregar_arquivo(self, caminho: str) -> None:
         with open(caminho, 'r', encoding='utf-8') as f:
             self.codigo = f.read()
@@ -34,12 +51,16 @@ class Lexer:
         self.linha = 1
         self.coluna = 1
         self.tokens = []
+        self._tamanho_codigo_bytes = sys.getsizeof(self.codigo)
+        self._resetar_contadores()
     def carregar_string(self, codigo: str) -> None:
         self.codigo = codigo
         self.posicao = 0
         self.linha = 1
         self.coluna = 1
         self.tokens = []
+        self._tamanho_codigo_bytes = sys.getsizeof(self.codigo)
+        self._resetar_contadores()
     def _char_atual(self) -> Optional[str]:
         # retorna o caractere atual ou None se fim do arquivo.
         if self.posicao < len(self.codigo):
@@ -67,6 +88,19 @@ class Lexer:
     def _pular_espacos(self) -> None:
         while self._char_atual() is not None and self._char_atual() in ' \t\r\n':
             self._avancar()
+            self._contagem_caracteres_processados += 1
+    def _resetar_contadores(self) -> None:
+        # reseta todos os contadores de profiling
+        self._tempo_inicio = None
+        self._tempo_fim = None
+        self._contagem_caracteres_processados = 0
+        self._contagem_tokens_afd = 0
+        self._contagem_tokens_string = 0
+        self._contagem_tokens_char = 0
+        self._contagem_tokens_numero = 0
+        self._contagem_tokens_identificador = 0
+        self._contagem_erros = 0
+        self._tamanho_tokens_bytes = 0
     def _reconhecer_string(self) -> Optional[Token]:
         # reconhece string entre aspas duplas com suporte a escapes
         if self._char_atual() != '"':
@@ -173,6 +207,51 @@ class Lexer:
             if token.tipo == TokenType.COMMENT_END:
                 return token
         raise LexicalError("causo", linha_inicio, coluna_inicio)
+    def relatorio_performance(self) -> None:
+        # relatório de performance da análise léxica
+        if not self.profile or self._tempo_inicio is None:
+            print("Profiling desabilitado ou análise não executada.")
+            return
+        
+        tempo_total = (self._tempo_fim or time.time()) - self._tempo_inicio
+        total_tokens = (self._contagem_tokens_afd + self._contagem_tokens_string + 
+                        self._contagem_tokens_char + self._contagem_tokens_numero + 
+                        self._contagem_tokens_identificador)
+        
+        print("\n" + "=" * 70)
+        print("RELATÓRIO DE PERFORMANCE - ANÁLISE LÉXICA")
+        print("=" * 70)
+        print(f"Tempo total:            {tempo_total*1000:.2f} ms")
+        print(f"Caracteres processados: {self._contagem_caracteres_processados}")
+        print(f"Tamanho do código:      {self._tamanho_codigo_bytes:,} bytes")
+        print(f"Tamanho de tokens:      {self._tamanho_tokens_bytes:,} bytes")
+        print("\nTOKENS POR TIPO:")
+        print(f"  - AFD:              {self._contagem_tokens_afd}")
+        print(f"  - STRING_LITERAL:   {self._contagem_tokens_string}")
+        print(f"  - CHAR_LITERAL:     {self._contagem_tokens_char}")
+        print(f"  - NUMBER_*:         {self._contagem_tokens_numero}")
+        print(f"  - IDENTIFIER:       {self._contagem_tokens_identificador}")
+        print(f"  - Total:            {total_tokens}")
+        print(f"  - Erros:            {self._contagem_erros}")
+        if total_tokens > 0 and tempo_total > 0:
+            tokens_por_segundo = total_tokens / tempo_total
+            chars_por_segundo = self._contagem_caracteres_processados / tempo_total
+            print(f"\nTaxas:")
+            print(f"  - Tokens/segundo:   {tokens_por_segundo:,.0f}")
+            print(f"  - Chars/segundo:    {chars_por_segundo:,.0f}")
+        print("=" * 70 + "\n")
+    def _consumir_comentario_multilinha(self, linha_inicio: int, coluna_inicio: int) -> Token:
+        while self._char_atual() is not None:
+            self._pular_espacos()
+            if self._char_atual() is None:
+                break
+            token = self._reconhecer_com_automato()
+            if token is None:
+                self._avancar()
+                continue
+            if token.tipo == TokenType.COMMENT_END:
+                return token
+        raise LexicalError("causo", linha_inicio, coluna_inicio)
     def _reconhecer_com_automato(self) -> Optional[Token]:
         if self.automato.estado_inicial is None:
             return None
@@ -217,6 +296,7 @@ class Lexer:
     
     def analisar(self) -> List[Token]:
         self.tokens = []
+        self._tempo_inicio = time.time()
         while self._char_atual() is not None:
             # Pula espaços em branco
             self._pular_espacos()
@@ -226,17 +306,32 @@ class Lexer:
             token_string = self._reconhecer_string()
             if token_string is not None:
                 self.tokens.append(token_string)
+                self._contagem_tokens_string += 1
+                self._contagem_caracteres_processados += len(token_string.lexema)
+                self._tamanho_tokens_bytes += sys.getsizeof(token_string)
                 continue
             # Tenta reconhecer char
             token_char = self._reconhecer_char()
             if token_char is not None:
                 self.tokens.append(token_char)
+                self._contagem_tokens_char += 1
+                self._contagem_caracteres_processados += len(token_char.lexema)
+                self._tamanho_tokens_bytes += sys.getsizeof(token_char)
                 continue
             linha_inicio = self.linha
             coluna_inicio = self.coluna
             # Tenta reconhecer com o autômato
             token = self._reconhecer_com_automato()
             if token is not None:
+                self._contagem_caracteres_processados += len(token.lexema)
+                if token.tipo == TokenType.IDENTIFIER:
+                    self._contagem_tokens_identificador += 1
+                elif token.tipo in {TokenType.NUMBER_REAL, TokenType.NUMBER_DECIMAL, 
+                                   TokenType.NUMBER_OCTAL, TokenType.NUMBER_HEX}:
+                    self._contagem_tokens_numero += 1
+                else:
+                    self._contagem_tokens_afd += 1
+                self._tamanho_tokens_bytes += sys.getsizeof(token)
                 if token.tipo == TokenType.COMMENT_START:
                     self.tokens.append(token)
                     token_fim = self._consumir_comentario_multilinha(token.linha, token.coluna)
@@ -263,7 +358,10 @@ class Lexer:
                 self.tokens.append(erro)
                 raise LexicalError(erro.lexema, erro.linha, erro.coluna)
         # Adiciona token de fim de arquivo
-        self.tokens.append(Token("EOF", TokenType.EOF, self.linha, self.coluna))
+        token_eof = Token("EOF", TokenType.EOF, self.linha, self.coluna)
+        self.tokens.append(token_eof)
+        self._tempo_fim = time.time()
+        self._tamanho_tokens_bytes += sys.getsizeof(token_eof)
         return self.tokens
     def tokens_generator(self) -> Generator[Token, None, None]:
         while self._char_atual() is not None:
