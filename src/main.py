@@ -23,7 +23,7 @@ def main() -> int:
     # Define arquivo padrão se não fornecido
     if caminho_arquivo is None:
         raiz_projeto = Path(__file__).resolve().parent.parent
-        caminho_arquivo = str(raiz_projeto / "exemplos" / "programa_exemplo.mineires.txt")
+        caminho_arquivo = str(raiz_projeto / "exemplos" / "programa_exemplo_1")
     if not Path(caminho_arquivo).exists():
         print(f"Arquivo não encontrado: {caminho_arquivo}")
         return 1

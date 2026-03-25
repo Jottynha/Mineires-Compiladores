@@ -89,6 +89,14 @@ class Lexer:
         while self._char_atual() is not None and self._char_atual() in ' \t\r\n':
             self._avancar()
             self._contagem_caracteres_processados += 1
+    def _eh_char_identificador(self, char: Optional[str]) -> bool:
+        return char is not None and (char.isalnum() or char == '_')
+    def _eh_lexema_identificador(self, lexema: str) -> bool:
+        if not lexema:
+            return False
+        if not (lexema[0].isalpha() or lexema[0] == '_'):
+            return False
+        return all(ch.isalnum() or ch == '_' for ch in lexema)
     def _resetar_contadores(self) -> None:
         # reseta todos os contadores de profiling
         self._tempo_inicio = None
@@ -291,6 +299,15 @@ class Lexer:
             if token_type == TokenType.IDENTIFIER:
                 if ultimo_lexema in RESERVED_WORDS:
                     token_type = RESERVED_WORDS[ultimo_lexema]
+            if (
+                token_type in RESERVED_WORDS.values()
+                and ultimo_lexema in RESERVED_WORDS
+                and self._eh_lexema_identificador(ultimo_lexema)
+                and self._eh_char_identificador(self._char_atual())
+            ):
+                while self._eh_char_identificador(self._char_atual()):
+                    ultimo_lexema += self._avancar() or ""
+                token_type = TokenType.IDENTIFIER
             return Token(ultimo_lexema, token_type, linha_inicio, coluna_inicio)
         return None
     

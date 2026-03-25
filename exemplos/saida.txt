@@ -1,88 +1,87 @@
-Tokens identificados: 59
+Tokens identificados: 58
 
 Tokens (tupla):
 ('uai_se', 'IF', 1, 1)
 (';', 'SEMICOLON', 1, 7)
 ('uai_senao', 'ELSE', 1, 8)
-('dependenu', 'SWITCH', 2, 1)
-('du_casu', 'CASE', 3, 1)
-('roda_esse_trem', 'FOR', 4, 1)
-('enquanto_tiver_trem', 'WHILE', 5, 1)
-('para_o_trem', 'BREAK', 6, 1)
-('toca_o_trem', 'CONTINUE', 7, 1)
-('bora_cumpade', 'MAIN', 8, 1)
-('ta_bao', 'RETURN', 9, 1)
-('xove', 'INPUT', 10, 1)
-('oia_proce_ve', 'OUTPUT', 11, 1)
-('//', 'COMMENT_LINE', 12, 1)
-('causo', 'COMMENT_START', 13, 1)
-('fim_do_causo', 'COMMENT_END', 14, 1)
-('trem_di_numeru', 'INT', 15, 1)
-('trem_cum_virgula', 'FLOAT', 16, 1)
-('trem_discolhe', 'BOOLEAN', 17, 1)
-('trem_discrita', 'STRING', 18, 1)
-('trosso', 'CHAR', 19, 1)
-('simbora', 'BEGIN_BLOCK', 20, 1)
-('cabou', 'END_BLOCK', 21, 1)
-('{', 'LBRACE', 22, 1)
-('}', 'RBRACE', 23, 1)
-('(', 'LPAREN', 24, 1)
-(')', 'RPAREN', 25, 1)
-('.', 'IDENTIFIER', 26, 1)
-(".'", 'LSINGLE_QUOTE', 27, 1)
-("'.", 'RSINGLE_QUOTE', 28, 1)
-('uai', 'SEMICOLON', 29, 1)
-(',', 'COMMA', 30, 1)
-('mema_coisa', 'EQUAL', 31, 1)
-('neh_nada', 'NOT_EQUAL', 32, 1)
-('fica_assim_entao', 'ASSIGN', 33, 1)
-('<', 'LESS', 34, 1)
-('>', 'GREATER', 35, 1)
-('<=', 'LESS_EQUAL', 36, 1)
-('>=', 'GREATER_EQUAL', 37, 1)
-('quarque_um', 'OR', 38, 1)
-('tamem', 'AND', 39, 1)
-('vam_marca', 'NOT', 40, 1)
-('um_o_oto', 'XOR', 41, 1)
-('eh', 'TRUE', 42, 1)
-('num_eh', 'FALSE', 43, 1)
-('+', 'IDENTIFIER', 44, 1)
-('-', 'MINUS', 45, 1)
-('veiz', 'MULTIPLY', 46, 1)
-('sob', 'DIVIDE', 47, 1)
-('%', 'MODULO', 48, 1)
-('/', 'INT_DIVIDE', 49, 1)
-('\\n', 'ESCAPE_NEWLINE', 50, 1)
-('\\t', 'ESCAPE_TAB', 51, 1)
-('\\"', 'ESCAPE_QUOTE', 52, 1)
-('000', 'NUMBER_DECIMAL', 53, 1)
-('.50', 'NUMBER_REAL', 54, 1)
-('01', 'NUMBER_OCTAL', 55, 1)
-('0x10F', 'NUMBER_HEX', 56, 1)
-('EOF', 'EOF', 56, 6)
+('dependenu', 'SWITCH', 1, 18)
+('du_casu', 'CASE', 1, 28)
+('roda_esse_trem', 'FOR', 1, 36)
+('enquanto_tiver_trem', 'WHILE', 1, 51)
+('para_o_trem', 'BREAK', 1, 71)
+('toca_o_trem', 'CONTINUE', 1, 83)
+('bora_cumpade', 'MAIN', 1, 95)
+('ta_bao', 'RETURN', 1, 108)
+('xove', 'INPUT', 2, 1)
+('oia_proce_ve', 'OUTPUT', 2, 6)
+('//', 'COMMENT_LINE', 2, 19)
+('causo', 'COMMENT_START', 2, 22)
+('fim_do_causo', 'COMMENT_END', 2, 28)
+('trem_di_numeru', 'INT', 2, 41)
+('trem_cum_virgula', 'FLOAT', 2, 56)
+('trem_discolhe', 'BOOLEAN', 2, 73)
+('trem_discrita', 'STRING', 2, 87)
+('trosso', 'CHAR', 2, 101)
+('simbora', 'BEGIN_BLOCK', 2, 108)
+('cabou', 'END_BLOCK', 3, 1)
+('{', 'LBRACE', 3, 7)
+('}', 'RBRACE', 3, 8)
+('(', 'LPAREN', 3, 9)
+(')', 'RPAREN', 3, 10)
+('.', 'IDENTIFIER', 3, 12)
+(".'", 'LSINGLE_QUOTE', 3, 14)
+("'.", 'RSINGLE_QUOTE', 3, 17)
+('uai', 'SEMICOLON', 3, 20)
+(',', 'COMMA', 3, 24)
+('mema_coisa', 'EQUAL', 4, 1)
+('neh_nada', 'NOT_EQUAL', 4, 12)
+('fica_assim_entao', 'ASSIGN', 4, 21)
+('<', 'LESS', 5, 1)
+('>', 'GREATER', 5, 2)
+('<=', 'LESS_EQUAL', 5, 3)
+('>=', 'GREATER_EQUAL', 5, 5)
+('quarque_um', 'OR', 5, 7)
+('tamem', 'AND', 6, 1)
+('vam_marca', 'NOT', 6, 7)
+('um_o_oto', 'XOR', 6, 17)
+('eh', 'TRUE', 7, 1)
+('num_eh', 'FALSE', 7, 4)
+('+', 'IDENTIFIER', 8, 1)
+('-', 'MINUS', 8, 2)
+('veizsob', 'IDENTIFIER', 9, 1)
+('%', 'MODULO', 10, 1)
+('/', 'INT_DIVIDE', 11, 1)
+('\\n', 'ESCAPE_NEWLINE', 12, 1)
+('\\t', 'ESCAPE_TAB', 13, 1)
+('\\"', 'ESCAPE_QUOTE', 14, 1)
+('000', 'NUMBER_DECIMAL', 15, 1)
+('.50', 'NUMBER_REAL', 16, 1)
+('01', 'NUMBER_OCTAL', 17, 1)
+('0x10F', 'NUMBER_HEX', 18, 1)
+('EOF', 'EOF', 18, 6)
 
 Resumo:
-- Identificados: 59
+- Identificados: 58
 - Não identificados: 0
 
 ======================================================================
 RELATÓRIO DE PERFORMANCE - ANÁLISE LÉXICA
 ======================================================================
-Tempo total:            2.30 ms
-Caracteres processados: 380
-Tamanho do código:      441 bytes
-Tamanho de tokens:      2,784 bytes
+Tempo total:            3.22 ms
+Caracteres processados: 371
+Tamanho do código:      432 bytes
+Tamanho de tokens:      2,736 bytes
 
 TOKENS POR TIPO:
-  - AFD:              51
+  - AFD:              49
   - STRING_LITERAL:   0
   - CHAR_LITERAL:     0
   - NUMBER_*:         4
-  - IDENTIFIER:       2
-  - Total:            57
+  - IDENTIFIER:       3
+  - Total:            56
   - Erros:            0
 
 Taxas:
-  - Tokens/segundo:   24,836
-  - Chars/segundo:    165,576
+  - Tokens/segundo:   17,410
+  - Chars/segundo:    115,343
 ======================================================================
