@@ -17,7 +17,8 @@ class TokenType(Enum):
     CONTINUE = auto()           # toca_o_trem
 
     # = Funções e Retorno =
-    MAIN = auto()               # bora_cumpade
+    FUNCTION_DEF = auto()       # bora_cumpade
+    MAIN = auto()               # main
     RETURN = auto()             # ta_bao
 
     # = Entrada e Saída =
@@ -113,7 +114,8 @@ RESERVED_WORDS = {
     "toca_o_trem": TokenType.CONTINUE,
 
     # Funções e Retorno
-    "bora_cumpade": TokenType.MAIN,
+    "bora_cumpade": TokenType.FUNCTION_DEF,
+    "main": TokenType.MAIN,
     "ta_bao": TokenType.RETURN,
 
     # Entrada/Saída

@@ -128,6 +128,9 @@ q_fim_do_cau INTERMEDIARIO
 q_fim_do_caus INTERMEDIARIO
 q_fim_do_causo FINAL IDENTIFIER
 q_m INTERMEDIARIO
+q_ma INTERMEDIARIO
+q_mai INTERMEDIARIO
+q_main FINAL IDENTIFIER
 q_me INTERMEDIARIO
 q_mem INTERMEDIARIO
 q_mema INTERMEDIARIO
@@ -558,6 +561,9 @@ q_fim_do_c q_fim_do_ca a
 q_fim_do_ca q_fim_do_cau u
 q_fim_do_cau q_fim_do_caus s
 q_fim_do_caus q_fim_do_causo o
+q_m q_ma a
+q_ma q_mai i
+q_mai q_main n
 q_m q_me e
 q_me q_mem m
 q_mem q_mema a
