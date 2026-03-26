@@ -39,7 +39,7 @@ class TokenType(Enum):
 
     # = Blocos e Símbolos =
     BEGIN_BLOCK = auto()        # simbora
-    END_BLOCK = auto()          # cabou
+    END_BLOCK = auto()          # cabo
     LBRACE = auto()             # {
     RBRACE = auto()             # }
     LPAREN = auto()             # (
@@ -136,7 +136,7 @@ RESERVED_WORDS = {
 
     # Blocos e Símbolos
     "simbora": TokenType.BEGIN_BLOCK,
-    "cabou": TokenType.END_BLOCK,
+    "cabo": TokenType.END_BLOCK,
     "{": TokenType.LBRACE,
     "}": TokenType.RBRACE,
     "(": TokenType.LPAREN,

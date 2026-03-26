@@ -51,8 +51,7 @@ q_bora_cumpade FINAL IDENTIFIER
 q_c INTERMEDIARIO
 q_ca INTERMEDIARIO
 q_cab INTERMEDIARIO
-q_cabo INTERMEDIARIO
-q_cabou FINAL IDENTIFIER
+q_cabo FINAL IDENTIFIER
 q_cau INTERMEDIARIO
 q_caus INTERMEDIARIO
 q_causo FINAL IDENTIFIER
@@ -498,7 +497,6 @@ q_bora_cumpad q_bora_cumpade e
 q_c q_ca a
 q_ca q_cab b
 q_cab q_cabo o
-q_cabo q_cabou u
 q_ca q_cau u
 q_cau q_caus s
 q_caus q_causo o
