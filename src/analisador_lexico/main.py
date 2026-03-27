@@ -7,7 +7,7 @@ from lexer import Lexer, LexicalError
 from token_type import TokenType
 
 # Define o diretório base do projeto
-SCRIPT_DIR = Path(__file__).resolve().parent.parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent.parent
 EXEMPLOS_DIR = SCRIPT_DIR / "exemplos"
 SAIDA_DIR = EXEMPLOS_DIR
 

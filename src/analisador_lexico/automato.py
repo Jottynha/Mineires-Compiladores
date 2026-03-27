@@ -124,7 +124,7 @@ def construir_automato_por_txt(caminho_txt: str, token_type_cls) -> Automato:
     return automato
 
 def _caminho_automato_padrao() -> str:
-    raiz_projeto = Path(__file__).resolve().parent.parent
+    raiz_projeto = Path(__file__).resolve().parent.parent.parent
     return str(raiz_projeto / "grafos" / "automato_simples.txt")
 
 def construir_automato() -> Automato:

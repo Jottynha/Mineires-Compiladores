@@ -17,7 +17,7 @@ Resumo:
 ======================================================================
 RELATÓRIO DE PERFORMANCE - ANÁLISE LÉXICA
 ======================================================================
-Tempo total:            0.35 ms
+Tempo total:            1.07 ms
 Caracteres processados: 65
 Tamanho do código:      114 bytes
 Tamanho de tokens:      384 bytes
@@ -32,6 +32,6 @@ TOKENS POR TIPO:
   - Erros:            0
 
 Taxas:
-  - Tokens/segundo:   20,207
-  - Chars/segundo:    187,632
+  - Tokens/segundo:   6,543
+  - Chars/segundo:    60,760
 ======================================================================
