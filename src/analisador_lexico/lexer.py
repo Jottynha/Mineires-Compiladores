@@ -267,6 +267,9 @@ class Lexer:
         lexema = ""
         linha_inicio = self.linha
         coluna_inicio = self.coluna
+        posicao_inicio = self.posicao
+        linha_posicao_inicio = self.linha
+        coluna_posicao_inicio = self.coluna
         ultimo_estado_final = None
         ultimo_lexema = ""
         ultima_posicao = self.posicao
@@ -309,6 +312,18 @@ class Lexer:
                     ultimo_lexema += self._avancar() or ""
                 token_type = TokenType.IDENTIFIER
             return Token(ultimo_lexema, token_type, linha_inicio, coluna_inicio)
+
+        # Não encontrou estado final: restaura e tenta reconhecer identificador genérico
+        self.posicao = posicao_inicio
+        self.linha = linha_posicao_inicio
+        self.coluna = coluna_posicao_inicio
+        char_atual = self._char_atual()
+        if char_atual is not None and (char_atual.isalpha() or char_atual == '_'):
+            lexema_identificador = self._avancar() or ""
+            while self._eh_char_identificador(self._char_atual()):
+                lexema_identificador += self._avancar() or ""
+            return Token(lexema_identificador, TokenType.IDENTIFIER, linha_inicio, coluna_inicio)
+
         return None
     
     def analisar(self) -> List[Token]:
