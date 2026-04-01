@@ -16,6 +16,7 @@ q_.' FINAL IDENTIFIER
 q_'. FINAL IDENTIFIER
 q_, FINAL IDENTIFIER
 q_; FINAL IDENTIFIER
+q_: FINAL IDENTIFIER
 q_< FINAL IDENTIFIER
 q_> FINAL IDENTIFIER
 q_= FINAL IDENTIFIER
@@ -304,7 +305,7 @@ q_num_dec FINAL NUMBER_DECIMAL
 q_num_octal FINAL NUMBER_OCTAL
 q_num_hex_prefix INTERMEDIARIO
 q_num_hex FINAL NUMBER_HEX
-q_num_real_dot INTERMEDIARIO
+q_num_real_dot FINAL NUMBER_REAL
 q_num_real FINAL NUMBER_REAL
 
 [TRANSICOES]
@@ -320,6 +321,7 @@ q0 q_' '
 q_' q_'. .
 q0 q_, ,
 q0 q_; ;
+q0 q_: :
 q0 q_< <
 q0 q_> >
 q0 q_= =

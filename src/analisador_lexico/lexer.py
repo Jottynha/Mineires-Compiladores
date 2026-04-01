@@ -365,9 +365,11 @@ class Lexer:
                     self._contagem_tokens_afd += 1
                 self._tamanho_tokens_bytes += sys.getsizeof(token)
                 if token.tipo == TokenType.COMMENT_START:
-                    self.tokens.append(token)
-                    token_fim = self._consumir_comentario_multilinha(token.linha, token.coluna)
-                    self.tokens.append(token_fim)
+                    self._consumir_comentario_multilinha(token.linha, token.coluna)
+                    continue
+                if token.tipo == TokenType.COMMENT_LINE:
+                    while self._char_atual() is not None and self._char_atual() != '\n':
+                        self._avancar()
                     continue
                 self._validar_numero_malformado(token)
                 # Ignora tokens de whitespace se necessário

@@ -1,7 +1,10 @@
 bora_cumpade main()
-simbora
+simbora:
+    // comentario
     trem_discrita mensagem uai
+    trosso letra uai fica_assim_entao '\n' ;
     fica_assim_entao "Uai, mundo!\n" uai
     oia_proce_ve(mensagem) uai
     ta_bao 0 uai
+    trem_di_numeru 10.
 cabo

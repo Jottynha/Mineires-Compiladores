@@ -48,6 +48,7 @@ class TokenType(Enum):
     LSINGLE_QUOTE = auto()      # .'
     RSINGLE_QUOTE = auto()      # '.
     SEMICOLON = auto()          # uai (;)
+    COLON = auto()              # :
     COMMA = auto()              # ,
 
     # = Operadores Relacionais =
@@ -147,6 +148,7 @@ RESERVED_WORDS = {
     "'.": TokenType.RSINGLE_QUOTE,
     "uai": TokenType.SEMICOLON,
     ";": TokenType.SEMICOLON,
+    ":": TokenType.COLON,
     ",": TokenType.COMMA,
 
     # Operadores Relacionais

@@ -1,4 +1,4 @@
-Tokens identificados: 21
+Tokens identificados: 30
 
 Tokens (tupla):
 ('bora_cumpade', 'FUNCTION_DEF', 1, 1)
@@ -6,45 +6,54 @@ Tokens (tupla):
 ('(', 'LPAREN', 1, 18)
 (')', 'RPAREN', 1, 19)
 ('simbora', 'BEGIN_BLOCK', 2, 1)
-('trem_discrita', 'STRING', 3, 5)
-('mensagem', 'IDENTIFIER', 3, 19)
-('uai', 'SEMICOLON', 3, 28)
-('fica_assim_entao', 'ASSIGN', 4, 5)
-('"Uai, mundo!\\n"', 'STRING_LITERAL', 4, 22)
-('uai', 'SEMICOLON', 4, 38)
-('oia_proce_ve', 'OUTPUT', 5, 5)
-('(', 'LPAREN', 5, 17)
-('mensagem', 'IDENTIFIER', 5, 18)
-(')', 'RPAREN', 5, 26)
-('uai', 'SEMICOLON', 5, 28)
-('ta_bao', 'RETURN', 6, 5)
-('0', 'NUMBER_DECIMAL', 6, 12)
-('uai', 'SEMICOLON', 6, 14)
-('cabou', 'IDENTIFIER', 7, 1)
-('EOF', 'EOF', 8, 1)
+(':', 'COLON', 2, 8)
+('trem_discrita', 'STRING', 4, 5)
+('mensagem', 'IDENTIFIER', 4, 19)
+('uai', 'SEMICOLON', 4, 28)
+('trosso', 'CHAR', 5, 5)
+('letra', 'IDENTIFIER', 5, 12)
+('uai', 'SEMICOLON', 5, 18)
+('fica_assim_entao', 'ASSIGN', 5, 22)
+("'\\n'", 'CHAR_LITERAL', 5, 39)
+(';', 'SEMICOLON', 5, 44)
+('fica_assim_entao', 'ASSIGN', 6, 5)
+('"Uai, mundo!\\n"', 'STRING_LITERAL', 6, 22)
+('uai', 'SEMICOLON', 6, 38)
+('oia_proce_ve', 'OUTPUT', 7, 5)
+('(', 'LPAREN', 7, 17)
+('mensagem', 'IDENTIFIER', 7, 18)
+(')', 'RPAREN', 7, 26)
+('uai', 'SEMICOLON', 7, 28)
+('ta_bao', 'RETURN', 8, 5)
+('0', 'NUMBER_DECIMAL', 8, 12)
+('uai', 'SEMICOLON', 8, 14)
+('trem_di_numeru', 'INT', 9, 5)
+('10.', 'NUMBER_REAL', 9, 20)
+('cabo', 'END_BLOCK', 10, 1)
+('EOF', 'EOF', 11, 1)
 
 Resumo:
-- Identificados: 21
+- Identificados: 30
 - Não identificados: 0
 
 ======================================================================
 RELATÓRIO DE PERFORMANCE - ANÁLISE LÉXICA
 ======================================================================
-Tempo total:            0.77 ms
-Caracteres processados: 154
-Tamanho do código:      203 bytes
-Tamanho de tokens:      1,008 bytes
+Tempo total:            1.14 ms
+Caracteres processados: 229
+Tamanho do código:      289 bytes
+Tamanho de tokens:      1,488 bytes
 
 TOKENS POR TIPO:
-  - AFD:              15
+  - AFD:              23
   - STRING_LITERAL:   1
-  - CHAR_LITERAL:     0
-  - NUMBER_*:         1
+  - CHAR_LITERAL:     1
+  - NUMBER_*:         2
   - IDENTIFIER:       3
-  - Total:            20
+  - Total:            30
   - Erros:            0
 
 Taxas:
-  - Tokens/segundo:   25,827
-  - Chars/segundo:    198,868
+  - Tokens/segundo:   26,352
+  - Chars/segundo:    201,151
 ======================================================================
