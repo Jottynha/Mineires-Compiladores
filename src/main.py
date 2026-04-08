@@ -8,7 +8,7 @@ from token_type import TokenType
 from analisador_sintatico import AnalisadorSintatico
 
 # Define o diretório base do projeto
-SCRIPT_DIR = Path(__file__).resolve().parent.parent.parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 EXEMPLOS_DIR = SCRIPT_DIR / "exemplos"
 SAIDA_DIR = EXEMPLOS_DIR
 

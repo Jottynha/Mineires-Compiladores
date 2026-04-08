@@ -25,7 +25,7 @@ class AnalisadorSintatico:
         if self.comparar_token(tipo) or self.comparar_token_literal(tipo):
             self.posicao += 1
         else:
-            return False
+            print(f"{self.token_atual()} =\= {RESERVED_WORDS[tipo]}")
         
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
