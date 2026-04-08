@@ -5,6 +5,7 @@ from pathlib import Path
 from automato import construir_automato
 from lexer import Lexer, LexicalError
 from token_type import TokenType
+from analisador_sintatico import AnalisadorSintatico
 
 # Define o diretório base do projeto
 SCRIPT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -140,6 +141,15 @@ def main() -> int:
             file.write(f"  - Tokens/segundo:   {tokens_por_segundo:,.0f}\n")
             file.write(f"  - Chars/segundo:    {chars_por_segundo:,.0f}\n")
         file.write("=" * 70 + "\n")
+
+    ## ANÁLISE SINTÁTICA ##
+    lista_enums = []
+    for token in tokens_identificados:
+        lista_enums.append(token.tipo.value)
+
+    analisador_sintatico = AnalisadorSintatico(lista_enums) # Criando analisador
+    analisador_sintatico.function()                         # Chamando function para iniciar a recursão
+    
     return 0
 
 if __name__ == "__main__":
