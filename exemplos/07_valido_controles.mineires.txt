@@ -1,0 +1,14 @@
+bora_cumpade main()
+simbora
+    trem_discolhe condicao uai
+    condicao fica_assim_entao eh quarque_um num_eh uai
+    uai_se (condicao) simbora
+        enquanto_tiver_trem (condicao) simbora
+            oia_proce_ve(condicao) uai
+            para_o_trem uai
+        cabo
+    cabo
+    uai_senao simbora
+        toca_o_trem uai
+    cabo
+cabo
