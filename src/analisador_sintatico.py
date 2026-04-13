@@ -72,19 +72,22 @@ class AnalisadorSintatico:
         token = self.token_atual()
         
         if isinstance(tipo_ou_chave, str) and tipo_ou_chave in RESERVED_WORDS:
-            return token.tipo == RESERVED_WORDS[tipo_ou_chave]
+            return token.tipo.value == RESERVED_WORDS[tipo_ou_chave].value
         
         if isinstance(tipo_ou_chave, TokenType):
-            return token.tipo == tipo_ou_chave
+            return token.tipo.value == tipo_ou_chave.value
         
         if isinstance(tipo_ou_chave, int):
             return token.tipo.value == tipo_ou_chave
         
         if tipo_ou_chave == 'IDENT':
-            return token.tipo == TokenType.IDENTIFIER
+            return token.tipo.value == TokenType.IDENTIFIER.value
         
-        return token.lexema == tipo_ou_chave or token.tipo.value == tipo_ou_chave
-
+        #return token.lexema == tipo_ou_chave or token.tipo.value == tipo_ou_chave
+        
+        return False
+        
+        
     def verificar(self, tipo_ou_chave):
         if self.comparar_token(tipo_ou_chave):
             token = self.token_atual()
@@ -473,6 +476,7 @@ class AnalisadorSintatico:
             token = self.token_atual()
             raise MineiresSyntaxError("um valor (literal ou identificador)", token.lexema, token.linha, token.coluna)
 
+# Main para testes rápidos no arquivo:
 if __name__ == "__main__":
     tokens = [
         Token('bora_cumpade', TokenType.FUNCTION_DEF, 1, 1),

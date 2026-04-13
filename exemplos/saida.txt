@@ -1,3 +1,4 @@
+== ANÁLISE LÉXICA ==
 Tokens identificados: 77
 
 Tokens (tupla):
@@ -83,7 +84,8 @@ Resumo:
 - Identificados: 77
 - Não identificados: 0
 
-Análise Sintática:
+
+== ANÁLISE SINTÁTICA ==
 - Sucesso: True
 
 Passos do analisador sintático:

@@ -6,12 +6,12 @@ from automato import construir_automato
 from lexer import Lexer, LexicalError
 from token_type import TokenType
 from analisador_sintatico import AnalisadorSintatico
+from analisador_sintatico import MineiresSyntaxError
 
 # Define o diretório base do projeto
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 EXEMPLOS_DIR = SCRIPT_DIR / "exemplos"
 SAIDA_DIR = EXEMPLOS_DIR
-
 
 def _listar_arquivos_exemplo() -> list[Path]:
     if not EXEMPLOS_DIR.exists():
@@ -23,7 +23,6 @@ def _listar_arquivos_exemplo() -> list[Path]:
             if arquivo.is_file() and arquivo.name != "saida.txt"
         ]
     )
-
 
 def _selecionar_arquivo_exemplo() -> Optional[str]:
     arquivos = _listar_arquivos_exemplo()
@@ -43,25 +42,29 @@ def _selecionar_arquivo_exemplo() -> Optional[str]:
                 return str(arquivos[indice - 1])
         print("Opção inválida. Tente novamente.")
 
+
 def main() -> int:
-    caminho_arquivo = None
-    # Parse argumentos
-    for arg in sys.argv[1:]:
-        caminho_arquivo = arg
-    # Define arquivo padrão se não fornecido
+    # == SETUP DE ARQUIVOS == #
+    caminho_arquivo = sys.argv[1] if len(sys.argv) > 1 else _selecionar_arquivo_exemplo()
+
     if caminho_arquivo is None:
-        caminho_arquivo = _selecionar_arquivo_exemplo()
-        if caminho_arquivo is None:
-            return 1
+        return 1
+
     caminho_path = Path(caminho_arquivo)
+
     if not caminho_path.exists():
-        candidato = EXEMPLOS_DIR / caminho_arquivo
-        if candidato.exists():
-            caminho_path = candidato
-        else:
-            print(f"Arquivo não encontrado: {caminho_arquivo}")
-            return 1
+        caminho_path = EXEMPLOS_DIR / caminho_arquivo
+
+    if not caminho_path.exists():
+        print(f"Arquivo não encontrado: {caminho_arquivo}")
+        return 1
+    
+
+    #== CONSTRUÇÃO DO AUTÔMATO ==#
     automato = construir_automato()
+    
+
+    # == ANÁLISE LÉXICA == #
     lexer = Lexer(automato, mostrar_erros=True)
     lexer.carregar_arquivo(str(caminho_path))
     try:
@@ -69,6 +72,7 @@ def main() -> int:
     except LexicalError as erro_lexico:
         print(str(erro_lexico))
         return 1
+    
     print(f"\nArquivo lido: {caminho_path}")
     print(f"Tokens identificados: {len(tokens_identificados)}")
     print("\nTokens (tupla):")
@@ -77,9 +81,25 @@ def main() -> int:
     print("\nResumo:")
     print(f"- Identificados: {len(tokens_identificados)}")
     print(f"- Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}")
-    # Salvando em um arquivo .txt separado:
+    
+    
+    # == ANÁLISE SINTÁTICA == #
+    analisador_sintatico = AnalisadorSintatico(tokens_identificados) # Criando analisador com objetos Token
+    erro_sintatico = None
+    sucesso_sintatico = False
+    try:
+        sucesso_sintatico = analisador_sintatico.function()    # Chamando function para iniciar a recursão
+    except MineiresSyntaxError as e:
+        erro_sintatico = str(e)
+        print(f"\n{e}")
+    if erro_sintatico is not None:
+        return 1
+    
+
+    # == SALVANDO RESULTADOS == #
     SAIDA_DIR.mkdir(parents=True, exist_ok=True)
     with open(SAIDA_DIR / "saida.txt", "w") as file:
+        file.write("== ANÁLISE LÉXICA ==\n")
         file.write(f"Tokens identificados: {len(tokens_identificados)}\n")
         file.write("\nTokens (tupla):\n")
         for token in tokens_identificados:
@@ -89,26 +109,15 @@ def main() -> int:
         file.write(
         f"- Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}\n"
         )
-    ## ANÁLISE SINTÁTICA ##
-    from analisador_sintatico import MineiresSyntaxError
-    analisador_sintatico = AnalisadorSintatico(tokens_identificados) # Criando analisador com objetos Token
-    erro_sintatico = None
-    sucesso_sintatico = False
-    try:
-        sucesso_sintatico = analisador_sintatico.function()    # Chamando function para iniciar a recursão
-    except MineiresSyntaxError as e:
-        erro_sintatico = str(e)
-        print(f"\n{e}")
-    with open(SAIDA_DIR / "saida.txt", "a") as file:
-        file.write("\nAnálise Sintática:\n")
+
+        file.write("\n\n== ANÁLISE SINTÁTICA ==\n")
         file.write(f"- Sucesso: {sucesso_sintatico}\n")
         if erro_sintatico is not None:
             file.write(f"- Erro: {erro_sintatico}\n")
         file.write("\nPassos do analisador sintático:\n")
         for passo in analisador_sintatico.get_trilha():
             file.write(passo + "\n")
-    if erro_sintatico is not None:
-        return 1
+        
     return 0
 
 if __name__ == "__main__":
