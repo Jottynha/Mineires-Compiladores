@@ -9,6 +9,7 @@ class TokenType(Enum):
     ELSE = auto()               # uai_senao
     SWITCH = auto()             # dependenu
     CASE = auto()               # du_casu
+    DEFAULT = auto()            # default
 
     # = Repetição =
     FOR = auto()                # roda_esse_trem
@@ -107,6 +108,7 @@ RESERVED_WORDS = {
     "uai_senao": TokenType.ELSE,
     "dependenu": TokenType.SWITCH,
     "du_casu": TokenType.CASE,   
+    "default": TokenType.DEFAULT,
     
     # Repetição
     "roda_esse_trem": TokenType.FOR,

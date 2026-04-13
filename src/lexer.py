@@ -261,7 +261,8 @@ class Lexer:
             lexema_identificador = self._avancar() or ""
             while self._eh_char_identificador(self._char_atual()):
                 lexema_identificador += self._avancar() or ""
-            return Token(lexema_identificador, TokenType.IDENTIFIER, linha_inicio, coluna_inicio)
+            token_type = RESERVED_WORDS.get(lexema_identificador, TokenType.IDENTIFIER)
+            return Token(lexema_identificador, token_type, linha_inicio, coluna_inicio)
 
         return None
     
