@@ -108,12 +108,14 @@ def main() -> int:
         )
 
     ## ANÁLISE SINTÁTICA ##
-    lista_enums = []
-    for token in tokens_identificados:
-        lista_enums.append(token.tipo.value)
-
-    analisador_sintatico = AnalisadorSintatico(lista_enums) # Criando analisador
-    analisador_sintatico.function()                         # Chamando function para iniciar a recursão
+    from analisador_sintatico import MineiresSyntaxError
+    
+    analisador_sintatico = AnalisadorSintatico(tokens_identificados) # Criando analisador com objetos Token
+    try:
+        analisador_sintatico.function()                         # Chamando function para iniciar a recursão
+    except MineiresSyntaxError as e:
+        print(f"\n{e}")
+        return 1
     
     return 0
 

@@ -1,31 +1,56 @@
-from token_type import RESERVED_WORDS
-from token_type import TokenType
+from token_type import RESERVED_WORDS, TokenType
+from mineires_token import Token
+
+class MineiresSyntaxError(Exception):
+    def __init__(self, esperado, encontrado, linha, coluna):
+        self.esperado = esperado
+        self.encontrado = encontrado
+        self.linha = linha
+        self.coluna = coluna
+        super().__init__(
+            f"Erro sintático na linha {linha}, coluna {coluna}: esperado '{esperado}', mas encontrou '{encontrado}'"
+        )
 
 class AnalisadorSintatico:
     def __init__(self, lista_tokens):
         self.tokens = lista_tokens
         self.posicao = 0
 
-    def token_atual(self):
-        return self.tokens[self.posicao]
+    def token_atual(self) -> Token:
+        if self.posicao < len(self.tokens):
+            return self.tokens[self.posicao]
+        return self.tokens[-1]
     
-    def comparar_token(self, tipo):
-        if (self.token_atual() == RESERVED_WORDS[tipo].value):
-            return True
-        else:
-            return False
+    def comparar_token(self, tipo_ou_chave):
+        token = self.token_atual()
         
-    def comparar_token_literal(self, tipo):
-        if (self.token_atual() == tipo):
+        if isinstance(tipo_ou_chave, str) and tipo_ou_chave in RESERVED_WORDS:
+            return token.tipo == RESERVED_WORDS[tipo_ou_chave]
+        
+        if isinstance(tipo_ou_chave, TokenType):
+            return token.tipo == tipo_ou_chave
+        
+        if isinstance(tipo_ou_chave, int):
+            return token.tipo.value == tipo_ou_chave
+        
+        if tipo_ou_chave == 'IDENT':
+            return token.tipo == TokenType.IDENTIFIER
+        
+        return token.lexema == tipo_ou_chave or token.tipo.value == tipo_ou_chave
+
+    def verificar(self, tipo_ou_chave):
+        if self.comparar_token(tipo_ou_chave):
+            self.posicao += 1
             return True
         else:
-            return False
-
-    def verificar(self, tipo):
-        if self.comparar_token(tipo) or self.comparar_token_literal(tipo):
-            self.posicao += 1
-        else:
-            print(f"{self.token_atual()} =\= {RESERVED_WORDS[tipo]}")
+            token = self.token_atual()
+            esperado = tipo_ou_chave
+            if isinstance(tipo_ou_chave, str) and tipo_ou_chave in RESERVED_WORDS:
+                esperado = f"{tipo_ou_chave} ({RESERVED_WORDS[tipo_ou_chave].name})"
+            elif isinstance(tipo_ou_chave, TokenType):
+                esperado = tipo_ou_chave.name
+            
+            raise MineiresSyntaxError(esperado, token.lexema, token.linha, token.coluna)
         
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
@@ -43,55 +68,83 @@ class AnalisadorSintatico:
         self.verificar('cabo')
         
     def stmtList(self):
-        if (self.stmt()):
-            self.stmtList()
+        while not self.comparar_token('cabo') and not self.comparar_token(TokenType.EOF):
+            if not self.stmt():
+                token = self.token_atual()
+                raise MineiresSyntaxError("um comando (roda_esse_trem, xove, etc.) ou 'cabo'", token.lexema, token.linha, token.coluna)
 
     def stmt(self):
         if self.comparar_token('roda_esse_trem'):
             self.forStmt()
+            return True
         
         elif self.comparar_token('xove') or self.comparar_token('oia_proce_ve'):
             self.ioStmt()
+            return True
         
         elif self.comparar_token('enquanto_tiver_trem'): 
             self.whileStmt()
+            return True
         
-        elif self.atrib():
-            self.verificar('uai')
-        
-        elif self.verificar('uai_se'):
+        elif self.comparar_token('uai_se'):
             self.ifStmt()
+            return True
         
-        elif self.verificar('dependenu'):
+        elif self.comparar_token('dependenu'):
             self.caseStmt()
+            return True
 
-        elif self.verificar('simbora'):
+        elif self.comparar_token('simbora'):
             self.bloco()
+            return True
 
-        elif self.verificar('para_o_trem') or self.verificar('toca_o_trem'):
+        elif self.comparar_token('para_o_trem') or self.comparar_token('toca_o_trem'):
+            self.verificar(self.token_atual().tipo)
             self.verificar('uai')
+            return True
         
-        elif self.type():
+        elif self.type_check():
             self.declaration()
+            self.verificar('uai')
+            return True
 
-        else:
-            self.verificar('uai') 
+        elif self.comparar_token(TokenType.IDENTIFIER) or self.comparar_token(TokenType.LPAREN):
+            self.atrib()
+            self.verificar('uai')
+            return True
+
+        elif self.comparar_token('uai'):
+            self.verificar('uai')
+            return True
+
+        return False
+
+    def type_check(self):
+        """Apenas verifica se o próximo token é um tipo, sem consumir."""
+        tipos = {
+            RESERVED_WORDS['trem_di_numeru'],
+            RESERVED_WORDS['trem_cum_virgula'],
+            RESERVED_WORDS['trem_discrita'],
+            RESERVED_WORDS['trem_discolhe'],
+            RESERVED_WORDS['trosso'],
+        }
+        return self.token_atual().tipo in tipos
 
     def type(self):
-        if self.token_atual() in {
-            RESERVED_WORDS['trem_di_numeru'].value,
-            RESERVED_WORDS['trem_cum_virgula'].value,
-            RESERVED_WORDS['trem_discrita'].value,
-            RESERVED_WORDS['trem_discolhe'].value,
-            RESERVED_WORDS['trosso'].value,
-        }:
+        tipos = {
+            RESERVED_WORDS['trem_di_numeru'],
+            RESERVED_WORDS['trem_cum_virgula'],
+            RESERVED_WORDS['trem_discrita'],
+            RESERVED_WORDS['trem_discolhe'],
+            RESERVED_WORDS['trosso'],
+        }
+        if self.token_atual().tipo in tipos:
             self.posicao += 1
+            return True
         else:
-            return False
+            token = self.token_atual()
+            raise MineiresSyntaxError("um tipo de dado (trem_...)", token.lexema, token.linha, token.coluna)
 
-
-
-    # Declarações:
     def declaration(self):
         self.type()
         self.identList()
@@ -101,7 +154,8 @@ class AnalisadorSintatico:
         self.restoIdentList()
 
     def restoIdentList(self):
-        if self.verificar(','):
+        if self.comparar_token(','):
+            self.verificar(',')
             self.verificar('IDENT')
             self.restoIdentList()
 
@@ -114,12 +168,13 @@ class AnalisadorSintatico:
         self.optExpr()
         self.verificar(';')
         self.optExpr()
-        self.verificar(';')
+        self.verificar(';') 
         self.verificar(')')
         self.stmt()
         
     def optExpr(self):
-        self.atrib()
+        if self.comparar_token(TokenType.IDENTIFIER):
+            self.atrib()
 
     # Comandos de IO
     def ioStmt(self):
@@ -130,14 +185,14 @@ class AnalisadorSintatico:
             self.verificar(',')
             self.verificar('IDENT')
             self.verificar(')')
-            self.verificar(';')
+            self.verificar('uai')
 
         elif self.comparar_token('oia_proce_ve'):
             self.verificar('oia_proce_ve')
             self.verificar('(')
             self.outList()
             self.verificar(')')
-            self.verificar(';')
+            self.verificar('uai')
     
     def outList(self):
         self.out()
@@ -189,21 +244,21 @@ class AnalisadorSintatico:
         self.restoDosCasos()
 
     def doCaso(self): 
-        self.verificar('du_caso')
+        self.verificar('du_casu')
         self.fatorZin()
         self.verificar(':')
         self.stmt()
     
     def restoDosCasos(self): 
-        if self.comparar_token('du_caso'):
+        if self.comparar_token('du_casu'):
             self.doCaso()
             self.restoDosCasos()
-        else:
-            self.verificar('default')
-            self.verificar(':')
-            self.stmt()
-
-    
+        elif self.comparar_token('cabo'):
+            return
+        # else:
+        #    self.verificar('default')
+        #    self.verificar(':')
+        #    self.stmt()
 
     # Expressões:
     def expr(self):
@@ -215,6 +270,7 @@ class AnalisadorSintatico:
 
     def restoAtrib(self):
         if self.comparar_token('fica_assim_entao'):
+            self.verificar('fica_assim_entao')
             self.atrib()
 
     def Or(self):
@@ -223,6 +279,7 @@ class AnalisadorSintatico:
 
     def restoOr(self):
         if self.comparar_token('quarque_um'):
+            self.verificar('quarque_um')
             self.xor()
             self.restoOr()
 
@@ -232,6 +289,7 @@ class AnalisadorSintatico:
 
     def restoXor(self):
         if self.comparar_token('um_o_oto'):
+            self.verificar('um_o_oto')
             self.And()
             self.restoXor()
 
@@ -241,11 +299,13 @@ class AnalisadorSintatico:
 
     def restoAnd(self):
         if self.comparar_token('tamem'):
+            self.verificar('tamem')
             self.Not()
             self.restoAnd()
 
     def Not(self):
-        if self.verificar('vam_marca'):
+        if self.comparar_token('vam_marca'):
+            self.verificar('vam_marca')
             self.Not()
         else:
             self.rel()
@@ -255,21 +315,20 @@ class AnalisadorSintatico:
         self.restoRel()
 
     def restoRel(self):
-        if (self.verificar('mema_coisa') or 
-            self.verificar('neh_nada') or
-            self.verificar('<') or
-            self.verificar('<=') or
-            self.verificar('>') or
-            self.verificar('>=')):
-            self.add()
+        relacionais = {'mema_coisa', 'neh_nada', '<', '<=', '>', '>='}
+        for rel in relacionais:
+            if self.comparar_token(rel):
+                self.verificar(rel)
+                self.add()
+                return
 
     def add(self):
         self.mult()
         self.restoAdd()
 
     def restoAdd(self):
-        if (self.verificar("+'") or
-            self.verificar('-')):
+        if self.comparar_token("+'") or self.comparar_token('-'):
+            self.verificar(self.token_atual().tipo)
             self.mult()
             self.restoAdd()
 
@@ -278,49 +337,64 @@ class AnalisadorSintatico:
         self.restoMult()
 
     def restoMult(self):
-        if (self.verificar('veiz') or
-            self.verificar('sob') or
-            self.verificar('/') or
-            self.verificar('%')):
+        if (self.comparar_token('veiz') or
+            self.comparar_token('sob') or
+            self.comparar_token('/') or
+            self.comparar_token('%')):
+            self.verificar(self.token_atual().tipo)
             self.uno()
             self.restoMult()
 
     def uno(self):
-        if(self.verificar("+'") or
-           self.verificar('-')):
+        if(self.comparar_token("+'") or
+           self.comparar_token('-')):
+            self.verificar(self.token_atual().tipo)
             self.uno()
         else:
             self.fatorZao()
 
     def fatorZao(self):
-        if self.verificar('('):
+        if self.comparar_token('('):
+            self.verificar('(')
             self.atrib()
             self.verificar(')')
         else:
             self.fatorZin()
 
     def fatorZin(self):
-        if self.comparar_token_literal(TokenType.STRING_LITERAL.value):
-            self.verificar(TokenType.STRING_LITERAL.value)
+        if self.comparar_token(TokenType.STRING_LITERAL):
+            self.verificar(TokenType.STRING_LITERAL)
 
-        elif self.comparar_token_literal(TokenType.IDENTIFIER.value):
-            self.verificar(TokenType.IDENTIFIER.value)
+        elif self.comparar_token(TokenType.IDENTIFIER):
+            self.verificar(TokenType.IDENTIFIER)
         
-        elif self.comparar_token_literal(TokenType.NUMBER_REAL.value):
-            self.verificar(TokenType.NUMBER_REAL.value)
+        elif self.comparar_token(TokenType.NUMBER_REAL):
+            self.verificar(TokenType.NUMBER_REAL)
         
-        elif self.comparar_token_literal(TokenType.NUMBER_DECIMAL.value):
-            self.verificar(TokenType.NUMBER_DECIMAL.value)
+        elif self.comparar_token(TokenType.NUMBER_DECIMAL):
+            self.verificar(TokenType.NUMBER_DECIMAL)
         
-        # atenção aqui pq chama trem_discolhe e talvez nn seja isso
-        elif self.comparar_token_literal(TokenType.BOOLEAN.value):
-            self.verificar(TokenType.BOOLEAN.value)
+        elif self.comparar_token(TokenType.BOOLEAN):
+            self.verificar(TokenType.BOOLEAN)
         
-        elif self.comparar_token_literal(TokenType.CHAR_LITERAL.value):
-            self.verificar(TokenType.CHAR_LITERAL.value)
+        elif self.comparar_token(TokenType.CHAR_LITERAL):
+            self.verificar(TokenType.CHAR_LITERAL)
+        else:
+            token = self.token_atual()
+            raise MineiresSyntaxError("um valor (literal ou identificador)", token.lexema, token.linha, token.coluna)
 
 if __name__ == "__main__":
-    # Testando o uai mundo com os values gerados: 
-    lista_enums = [9, 10, 26, 27, 22, 32, 19, 62, 31, 21, 62, 31, 36, 58, 31, 36, 57, 31, 13, 26, 62, 27, 31, 11, 54, 31, 17, 53, 23, 63]
-    sint = AnalisadorSintatico(lista_enums)
-    sint.function()
+    tokens = [
+        Token('bora_cumpade', TokenType.FUNCTION_DEF, 1, 1),
+        Token('main', TokenType.MAIN, 1, 14),
+        Token('(', TokenType.LPAREN, 1, 19),
+        Token(')', TokenType.RPAREN, 1, 20),
+        Token('simbora', TokenType.BEGIN_BLOCK, 2, 1),
+        Token('cabo', TokenType.END_BLOCK, 3, 1),
+        Token('EOF', TokenType.EOF, 4, 1)
+    ]
+    sint = AnalisadorSintatico(tokens)
+    try:
+        sint.function()
+    except MineiresSyntaxError as e:
+        print(e)
