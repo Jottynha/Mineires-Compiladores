@@ -1,7 +1,7 @@
 <h1 align="center">
 Trabalho de Compiladores
 
-para a linguagem _Mineirês_
+para a linguagem _Minerês_
 </h1>
 
 <div align="center">
@@ -47,12 +47,14 @@ para a linguagem _Mineirês_
 
 ```
 ├── exemplos
-│   ├── 01_valido_basico.mineires.txt
-│   ├── 02_variaveis_parecidas.mineires.txt
-│   ├── 03_erro_string_nao_fechada.mineires.txt
-│   ├── 04_erro_numero_malformado.mineires.txt
-│   ├── 05_erro_simbolo_desconhecido.mineires.txt
-│   ├── 06_erro_comentario_multilinha_nao_fechado.mineires.txt
+│   ├── 01_uai_mundo.txt
+│   ├── 02_par_ou_impar.txt
+│   ├── 03_switch_case.txt
+│   ├── 04_controles.txt
+│   ├── 05_teste_completo.txt
+│   ├── 06_fibonacci.txt
+│   ├── 07_codigo_errado.txt
+│   ├── 08_par_impar_errado.txt
 │   └── saida.txt
 ├── grafos
 │   └── automato_simples.txt
@@ -68,7 +70,15 @@ para a linguagem _Mineirês_
 ```
 ---
 
-- `exemplos/`: casos de teste válidos e com erros fatais.
+- `exemplos/`: casos de teste válidos e com erros.
+    - `01_uai_mundo.txt`: O "Hello World" do Minerês;
+    - `02_par_ou_impar.txt`: Verifica se um número é par ou ímpar;
+    - `03_switch_case.txt`: Testa um switch case simples;
+    - `04_controles.txt`: Testa desvios e laços de repetição;
+    - `05_teste_completo.txt`: Teste mais abrangente da gramática;
+    - `06_fibonacci.txt`: Implementação de Fibonacci não-recursivo em Minerês;
+    - `07_codigo_errado.txt`: Testa um Uai Mundo com erro sintático;
+    - `08_par_impar_errado.txt`: Testa um par ou ímpar com erro sintático;
 
 - `grafos/`: pasta que armazena o conteúdo de AFDs analisados pelo script.
     - `automato_simples.txt`: Arquivo de texto qua armazena textualmente os estados e transições do AFD que descreve a linguagem Minerês.

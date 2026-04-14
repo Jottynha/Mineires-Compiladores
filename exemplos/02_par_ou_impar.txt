@@ -1,0 +1,11 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+
+    x fica_assim_entao 4 uai
+
+    uai_se (x % 2 mema_coisa 0)
+        oia_proce_ve("par") uai
+    uai_senao
+        oia_proce_ve("impar") uai
+cabo

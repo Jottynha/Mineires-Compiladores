@@ -60,7 +60,7 @@ def main() -> int:
         return 1
     
 
-    #== CONSTRUÇÃO DO AUTÔMATO ==#
+    # == CONSTRUÇÃO DO AUTÔMATO == #
     automato = construir_automato()
     
 

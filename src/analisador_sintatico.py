@@ -40,6 +40,11 @@ class AnalisadorSintatico:
             self.verificar(';')
             return True
         return False
+    
+    def exigir_terminador(self):
+        if not self._aceitar_terminador():
+            token = self.token_atual()
+            raise MineiresSyntaxError("terminador ('uai' ou ';')", token.lexema, token.linha, token.coluna)
 
     def _inicio_tipo(self):
         return self.token_atual().tipo in {
@@ -161,22 +166,21 @@ class AnalisadorSintatico:
 
         elif self.comparar_token('para_o_trem') or self.comparar_token('toca_o_trem'):
             self.verificar(self.token_atual().tipo)
-            self._aceitar_terminador()
+            self.exigir_terminador()
             return True
         
         elif self._inicio_tipo():
             self.declaration()
-            self._aceitar_terminador()
             return True
 
         elif self.comparar_token('fica_assim_entao'):
             self.atrib()
-            self._aceitar_terminador()
+            self.exigir_terminador()
             return True
 
         elif self._inicio_expr():
             self.atrib()
-            self._aceitar_terminador()
+            self.exigir_terminador()
             return True
 
         elif self.comparar_token('uai') or self.comparar_token(';'):
@@ -211,6 +215,7 @@ class AnalisadorSintatico:
         self._entrar('declaration')
         self.type()
         self.identList()
+        self.exigir_terminador()
 
     def identList(self):
         self._entrar('identList')
@@ -251,14 +256,14 @@ class AnalisadorSintatico:
             self.verificar(',')
             self.verificar('IDENT')
             self.verificar(')')
-            self._aceitar_terminador()
+            self.exigir_terminador()
 
         elif self.comparar_token('oia_proce_ve'):
             self.verificar('oia_proce_ve')
             self.verificar('(')
             self.outList()
             self.verificar(')')
-            self._aceitar_terminador()
+            self.exigir_terminador()
     
     def outList(self):
         self._entrar('outList')
@@ -413,7 +418,7 @@ class AnalisadorSintatico:
         self.restoAdd()
 
     def restoAdd(self):
-        if self.comparar_token("+'") or self.comparar_token('-'):
+        if self.comparar_token("+") or self.comparar_token('-'):
             self.verificar(self.token_atual().tipo)
             self.mult()
             self.restoAdd()
@@ -434,7 +439,7 @@ class AnalisadorSintatico:
 
     def uno(self):
         self._entrar('uno')
-        if(self.comparar_token("+'") or
+        if(self.comparar_token("+") or
            self.comparar_token('-')):
             self.verificar(self.token_atual().tipo)
             self.uno()

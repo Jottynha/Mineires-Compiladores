@@ -177,7 +177,7 @@ RESERVED_WORDS = {
     "num_eh": TokenType.FALSE,
     
     # Operadores Aritméticos
-    "+'": TokenType.PLUS,
+    "+": TokenType.PLUS,
     "-'": TokenType.MINUS,
     "-": TokenType.MINUS,
     "veiz": TokenType.MULTIPLY,
