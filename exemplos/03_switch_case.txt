@@ -11,7 +11,7 @@ simbora
             oia_proce_ve("dois") uai
         du_casu 3:
             oia_proce_ve("tres") uai
-        default:
+        uai_so:
             oia_proce_ve("outro") uai
     cabo
 cabo

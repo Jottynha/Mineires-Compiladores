@@ -332,8 +332,8 @@ class AnalisadorSintatico:
         if self.comparar_token('du_casu'):
             self.doCaso()
             self.restoDosCasos()
-        elif self.comparar_token('default'):
-            self.verificar('default')
+        elif self.comparar_token('uai_so'):
+            self.verificar('uai_so')
             self.verificar(':')
             self.stmt()
         elif self.comparar_token('cabo'):

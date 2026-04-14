@@ -275,6 +275,7 @@ q_uai_se FINAL IDENTIFIER
 q_uai_sen INTERMEDIARIO
 q_uai_sena INTERMEDIARIO
 q_uai_senao FINAL IDENTIFIER
+q_uai_so FINAL IDENTIFIER
 q_um INTERMEDIARIO
 q_um_ INTERMEDIARIO
 q_um_o INTERMEDIARIO
@@ -701,6 +702,7 @@ q_uai_s q_uai_se e
 q_uai_se q_uai_sen n
 q_uai_sen q_uai_sena a
 q_uai_sena q_uai_senao o
+q_uai_s q_uai_so o
 q_um q_um_ _
 q_um_ q_um_o o
 q_um_o q_um_o_ _
