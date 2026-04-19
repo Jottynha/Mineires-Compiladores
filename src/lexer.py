@@ -171,6 +171,9 @@ class Lexer:
         proximo = self._char_atual()
         if proximo is None:
             return
+        if token.tipo == TokenType.NUMBER_OCTAL and proximo.isdigit():
+            resto = self._consumir_numero_malformado()
+            raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna)
         if proximo.isalpha() or proximo == '_' or proximo == '.':
             resto = self._consumir_numero_malformado()
             raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna)
