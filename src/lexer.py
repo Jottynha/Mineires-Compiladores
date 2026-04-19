@@ -6,13 +6,15 @@ from mineires_token import Token
 
 
 class LexicalError(Exception):
-    def __init__(self, lexema: str, linha: int, coluna: int):
+    def __init__(self, lexema: str, linha: int, coluna: int, mensagem_especifica: Optional[str] = None):
         self.lexema = lexema
         self.linha = linha
         self.coluna = coluna
-        super().__init__(
-            f"Erro léxico: string '{lexema}' não reconhecida na linha {linha}, coluna {coluna}"
-        )
+        if mensagem_especifica:
+            mensagem = f"Erro léxico na linha {linha}, coluna {coluna}: {mensagem_especifica}"
+        else:
+            mensagem = f"Erro léxico: string '{lexema}' não reconhecida na linha {linha}, coluna {coluna}"
+        super().__init__(mensagem)
 
 class Lexer:
     def __init__(self, automato: Automato, mostrar_erros: bool = True):
@@ -97,18 +99,18 @@ class Lexer:
                 if proximo in 'ntr"\\':
                     lexema += self._avancar() or ""
                 else:
-                    raise LexicalError(lexema, linha_inicio, coluna_inicio)
+                    raise LexicalError(lexema, linha_inicio, coluna_inicio, f"sequência de escape inválida '\\{proximo}' em string")
             elif char == '"':
                 # Fim da string
                 lexema += self._avancar() or ""
                 return Token(lexema, TokenType.STRING_LITERAL, linha_inicio, coluna_inicio)
             elif char == '\n':
                 # Quebra de linha dentro de string é erro
-                raise LexicalError(lexema, linha_inicio, coluna_inicio)
+                raise LexicalError(lexema, linha_inicio, coluna_inicio, "quebra de linha dentro de string literal")
             else:
                 lexema += self._avancar() or ""
         # String não fechada
-        raise LexicalError(lexema, linha_inicio, coluna_inicio)
+        raise LexicalError(lexema, linha_inicio, coluna_inicio, "string literal não fechada (esperado '\"')")
     def _reconhecer_char(self) -> Optional[Token]:
         # reconhece char único entre aspas simples
         if self._char_atual() != "'":
@@ -128,25 +130,25 @@ class Lexer:
         # Primeiro caractere (pode ser escape)
         char = self._char_atual()
         if char is None:
-            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            raise LexicalError(lexema, linha_inicio, coluna_inicio, "char literal incompleto (esperado caractere ou escape)")
         if char == '\\':
             # Escape sequence
             lexema += self._avancar() or ""
             proximo = self._char_atual()
             if proximo not in 'ntr"\\':
-                raise LexicalError(lexema, linha_inicio, coluna_inicio)
+                raise LexicalError(lexema, linha_inicio, coluna_inicio, f"sequência de escape inválida '\\{proximo}' em char")
             lexema += self._avancar() or ""
         elif char == "'":
             # Char vazio
-            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            raise LexicalError(lexema, linha_inicio, coluna_inicio, "char literal vazio (esperado um caractere entre aspas simples)")
         elif char == '\n':
             # Quebra de linha dentro de char é erro
-            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            raise LexicalError(lexema, linha_inicio, coluna_inicio, "quebra de linha dentro de char literal")
         else:
             lexema += self._avancar() or ""
         # Deve ter aspas simples de fechamento
         if self._char_atual() != "'":
-            raise LexicalError(lexema, linha_inicio, coluna_inicio)
+            raise LexicalError(lexema, linha_inicio, coluna_inicio, "char literal não fechado (esperado ')")
         lexema += self._avancar() or ""
         return Token(lexema, TokenType.CHAR_LITERAL, linha_inicio, coluna_inicio)
     def _consumir_lexema_invalido(self) -> str:
@@ -173,10 +175,10 @@ class Lexer:
             return
         if token.tipo == TokenType.NUMBER_OCTAL and proximo.isdigit():
             resto = self._consumir_numero_malformado()
-            raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna)
+            raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna, "número octal inválido (contém dígito fora do intervalo 0-7)")
         if proximo.isalpha() or proximo == '_' or proximo == '.':
             resto = self._consumir_numero_malformado()
-            raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna)
+            raise LexicalError(f"{token.lexema}{resto}", token.linha, token.coluna, "número malformado (contém caracteres inválidos após número)")
     def _consumir_comentario_multilinha(self, linha_inicio: int, coluna_inicio: int) -> Token:
         while self._char_atual() is not None:
             self._pular_espacos()
@@ -188,20 +190,7 @@ class Lexer:
                 continue
             if token.tipo == TokenType.COMMENT_END:
                 return token
-        raise LexicalError("causo", linha_inicio, coluna_inicio)
-
-    def _consumir_comentario_multilinha(self, linha_inicio: int, coluna_inicio: int) -> Token:
-        while self._char_atual() is not None:
-            self._pular_espacos()
-            if self._char_atual() is None:
-                break
-            token = self._reconhecer_com_automato()
-            if token is None:
-                self._avancar()
-                continue
-            if token.tipo == TokenType.COMMENT_END:
-                return token
-        raise LexicalError("causo", linha_inicio, coluna_inicio)
+        raise LexicalError("causo", linha_inicio, coluna_inicio, "comentário multilinha não fechado (esperado '*/u')")
     def _reconhecer_com_automato(self) -> Optional[Token]:
         if self.automato.estado_inicial is None:
             return None
@@ -310,14 +299,14 @@ class Lexer:
                         numero_invalido = self._avancar() or ""
                     erro = Token(numero_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
                     self.tokens.append(erro)
-                    raise LexicalError(erro.lexema, erro.linha, erro.coluna)
+                    raise LexicalError(erro.lexema, erro.linha, erro.coluna, "número malformado (sintaxe inválida)")
                 # Lexema não reconhecido - erro léxico
                 lexema_invalido = self._consumir_lexema_invalido()
                 if not lexema_invalido and self._char_atual() is not None:
                     lexema_invalido = self._avancar() or ""
                 erro = Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
                 self.tokens.append(erro)
-                raise LexicalError(erro.lexema, erro.linha, erro.coluna)
+                raise LexicalError(erro.lexema, erro.linha, erro.coluna, "token não reconhecido")
         # Adiciona token de fim de arquivo
         token_eof = Token("EOF", TokenType.EOF, self.linha, self.coluna)
         self.tokens.append(token_eof)
@@ -357,13 +346,13 @@ class Lexer:
                         numero_invalido = self._avancar() or ""
                     erro = Token(numero_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
                     yield erro
-                    raise LexicalError(erro.lexema, erro.linha, erro.coluna)
+                    raise LexicalError(erro.lexema, erro.linha, erro.coluna, "número malformado (sintaxe inválida)")
                 lexema_invalido = self._consumir_lexema_invalido()
                 if not lexema_invalido and self._char_atual() is not None:
                     lexema_invalido = self._avancar() or ""
                 erro = Token(lexema_invalido, TokenType.ERROR, linha_inicio, coluna_inicio)
                 yield erro
-                raise LexicalError(erro.lexema, erro.linha, erro.coluna)
+                raise LexicalError(erro.lexema, erro.linha, erro.coluna, "token não reconhecido")
         yield Token("EOF", TokenType.EOF, self.linha, self.coluna)    
     def imprimir_tokens(self) -> None:
         print("\n" + "=" * 70)
