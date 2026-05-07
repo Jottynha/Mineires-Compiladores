@@ -1,0 +1,5 @@
+bora_cumpade main ( ) simbora
+  num fica_assim_entao 5 uai
+  resultado fica_assim_entao num uai
+  oia_proce_ve ( resultado ) uai
+cabo

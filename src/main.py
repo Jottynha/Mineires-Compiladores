@@ -114,6 +114,11 @@ def main() -> int:
         file.write(f"- Sucesso: {sucesso_sintatico}\n")
         if erro_sintatico is not None:
             file.write(f"- Erro: {erro_sintatico}\n")
+        
+        file.write("\n\n== CÓDIGO INTERMEDIÁRIO ==\n")
+        for instr in analisador_sintatico.codigo:
+            file.write(str(instr) + "\n")
+        
         file.write("\nPassos do analisador sintático:\n")
         for passo in analisador_sintatico.get_trilha():
             file.write(passo + "\n")

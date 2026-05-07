@@ -17,6 +17,9 @@ class AnalisadorSintatico:
         self.posicao = 0
         self.trilha = []
         self.erro = None
+        self.codigo = []  # Lista de tuplas de código intermediário
+        self.temp_count = 0  # Contador para gerar nomes de temporários
+        self.vars_table = {}  # Tabela simples de variáveis (nome -> valor/tipo)
 
     def token_atual(self) -> Token:
         if self.posicao < len(self.tokens):
@@ -72,6 +75,15 @@ class AnalisadorSintatico:
 
     def get_trilha(self):
         return self.trilha
+    
+    def _emit(self, op: str, arg1: str, arg2: str | None, arg3: str | None):
+        #Emite uma tupla de código intermediário
+        self.codigo.append((op, arg1, arg2, arg3))
+    
+    def _temp_var(self) -> str:
+        #Gera variavel temporaria
+        self.temp_count += 1
+        return f"_t{self.temp_count}"
     
     def comparar_token(self, tipo_ou_chave):
         token = self.token_atual()
@@ -179,7 +191,7 @@ class AnalisadorSintatico:
             return True
 
         elif self._inicio_expr():
-            self.atrib()
+            tipo, valor = self.atrib()
             self.exigir_terminador()
             return True
 
@@ -244,7 +256,7 @@ class AnalisadorSintatico:
     def optExpr(self):
         self._entrar('optExpr')
         if self._inicio_expr():
-            self.atrib()
+            tipo, valor = self.atrib()
 
     # Comandos de IO
     def ioStmt(self):
@@ -254,8 +266,11 @@ class AnalisadorSintatico:
             self.verificar('(')
             self.type()
             self.verificar(',')
+            var_name = self.token_atual().lexema
             self.verificar('IDENT')
             self.verificar(')')
+            self._emit('call', 'read', var_name, None)
+            self.vars_table[var_name] = '0'  # inicializa com 0
             self.exigir_terminador()
 
         elif self.comparar_token('oia_proce_ve'):
@@ -272,7 +287,8 @@ class AnalisadorSintatico:
 
     def out(self):
         self._entrar('out')
-        self.fatorZin()
+        tipo, valor = self.fatorZin()
+        self._emit('call', 'print', valor if tipo == 'var' else None, valor if tipo != 'var' else None)
 
     def restoOutList(self):
         if self.comparar_token(','):
@@ -285,7 +301,7 @@ class AnalisadorSintatico:
         self._entrar('whileStmt')
         self.verificar('enquanto_tiver_trem')
         self.verificar('(')
-        self.expr()
+        tipo, valor = self.expr()
         self.verificar(')')
         self.stmt()
 
@@ -294,7 +310,7 @@ class AnalisadorSintatico:
         self._entrar('ifStmt')
         self.verificar('uai_se')
         self.verificar('(')
-        self.expr()
+        tipo, valor = self.expr()
         self.verificar(')')
         self.stmt()
         self.elsePart()
@@ -324,7 +340,7 @@ class AnalisadorSintatico:
     def doCaso(self): 
         self._entrar('doCaso')
         self.verificar('du_casu')
-        self.fatorZin()
+        tipo, valor = self.fatorZin()
         self.verificar(':')
         self.stmt()
     
@@ -342,16 +358,33 @@ class AnalisadorSintatico:
     # Expressões:
     def expr(self):
         self._entrar('expr')
-        self.atrib()
+        return self.atrib()
 
     def atrib(self):
+        """Trata atribuição e expressões. Retorna (tipo, valor) para código intermediário."""
         self._entrar('atrib')
-        if self.comparar_token('fica_assim_entao'):
+        
+        # Detecta padrão: IDENT fica_assim_entao expr
+        if (self.comparar_token(TokenType.IDENTIFIER) and 
+            self.posicao + 1 < len(self.tokens) and 
+            self.tokens[self.posicao + 1].lexema == 'fica_assim_entao'):
+            lhs_token = self.token_atual()
+            lhs = lhs_token.lexema
+            self.verificar(TokenType.IDENTIFIER)
             self.verificar('fica_assim_entao')
-            self.atrib()
-            return
-        self.Or()
+            
+            # Recursivamente processa o lado direito
+            rhs_tipo, rhs_valor = self.atrib()
+            
+            # Emite atribuição
+            self._emit('att', lhs, rhs_valor, None)
+            self.vars_table[lhs] = rhs_valor
+            return ('var', lhs)
+        
+        # Caso contrário, processa como expressão normal (Or)
+        tipo, valor = self.Or()
         self.restoAtrib()
+        return (tipo, valor)
 
     def restoAtrib(self):
         if self.comparar_token('fica_assim_entao'):
@@ -360,123 +393,175 @@ class AnalisadorSintatico:
 
     def Or(self):
         self._entrar('Or')
-        self.xor()
-        self.restoOr()
+        tipo, valor = self.xor()
+        return self.restoOr(tipo, valor)
 
-    def restoOr(self):
+    def restoOr(self, tipo, valor):
         if self.comparar_token('quarque_um'):
             self.verificar('quarque_um')
-            self.xor()
-            self.restoOr()
+            tipo2, valor2 = self.xor()
+            temp = self._temp_var()
+            self._emit('or', temp, valor, valor2)
+            return self.restoOr('bool', temp)
+        return (tipo, valor)
 
     def xor(self):
         self._entrar('xor')
-        self.And()
-        self.restoXor()
+        tipo, valor = self.And()
+        return self.restoXor(tipo, valor)
 
-    def restoXor(self):
+    def restoXor(self, tipo, valor):
         if self.comparar_token('um_o_oto'):
             self.verificar('um_o_oto')
-            self.And()
-            self.restoXor()
+            tipo2, valor2 = self.And()
+            temp = self._temp_var()
+            self._emit('xor', temp, valor, valor2)
+            return self.restoXor('bool', temp)
+        return (tipo, valor)
 
     def And(self):
         self._entrar('And')
-        self.Not()
-        self.restoAnd()
+        tipo, valor = self.Not()
+        return self.restoAnd(tipo, valor)
 
-    def restoAnd(self):
+    def restoAnd(self, tipo, valor):
         if self.comparar_token('tamem'):
             self.verificar('tamem')
-            self.Not()
-            self.restoAnd()
+            tipo2, valor2 = self.Not()
+            temp = self._temp_var()
+            self._emit('and', temp, valor, valor2)
+            return self.restoAnd('bool', temp)
+        return (tipo, valor)
 
     def Not(self):
         self._entrar('Not')
         if self.comparar_token('vam_marca'):
             self.verificar('vam_marca')
-            self.Not()
+            tipo, valor = self.Not()
+            temp = self._temp_var()
+            self._emit('not', temp, valor, None)
+            return ('bool', temp)
         else:
-            self.rel()
+            return self.rel()
 
     def rel(self):
         self._entrar('rel')
-        self.add()
-        self.restoRel()
+        tipo, valor = self.add()
+        return self.restoRel(tipo, valor)
 
-    def restoRel(self):
+    def restoRel(self, tipo, valor):
         relacionais = {'mema_coisa', 'neh_nada', '<', '<=', '>', '>='}
         for rel in relacionais:
             if self.comparar_token(rel):
                 self.verificar(rel)
-                self.add()
-                return
+                tipo2, valor2 = self.add()
+                temp = self._temp_var()
+                op_map = {
+                    'mema_coisa': 'eq', 'neh_nada': 'dif',
+                    '<': 'les', '<=': 'leq', '>': 'grt', '>=': 'geq'
+                }
+                self._emit(op_map.get(rel, rel), temp, valor, valor2)
+                return ('bool', temp)
+        return (tipo, valor)
 
     def add(self):
         self._entrar('add')
-        self.mult()
-        self.restoAdd()
+        tipo, valor = self.mult()
+        return self.restoAdd(tipo, valor)
 
-    def restoAdd(self):
+    def restoAdd(self, tipo, valor):
         if self.comparar_token("+") or self.comparar_token('-'):
+            op = self.token_atual().lexema
             self.verificar(self.token_atual().tipo)
-            self.mult()
-            self.restoAdd()
+            tipo2, valor2 = self.mult()
+            temp = self._temp_var()
+            op_code = 'add' if op == '+' else 'sub'
+            self._emit(op_code, temp, valor, valor2)
+            return self.restoAdd('num', temp)
+        return (tipo, valor)
 
     def mult(self):
         self._entrar('mult')
-        self.uno()
-        self.restoMult()
+        tipo, valor = self.uno()
+        return self.restoMult(tipo, valor)
 
-    def restoMult(self):
+    def restoMult(self, tipo, valor):
         if (self.comparar_token('veiz') or
             self.comparar_token('sob') or
             self.comparar_token('/') or
             self.comparar_token('%')):
+            op = self.token_atual().lexema
             self.verificar(self.token_atual().tipo)
-            self.uno()
-            self.restoMult()
+            tipo2, valor2 = self.uno()
+            temp = self._temp_var()
+            op_map = {'veiz': 'mult', 'sob': 'divI', '/': 'div', '%': 'mod'}
+            self._emit(op_map.get(op, op), temp, valor, valor2)
+            return self.restoMult('num', temp)
+        return (tipo, valor)
 
     def uno(self):
         self._entrar('uno')
         if(self.comparar_token("+") or
            self.comparar_token('-')):
+            op = self.token_atual().lexema
             self.verificar(self.token_atual().tipo)
-            self.uno()
+            tipo, valor = self.uno()
+            # Unário + ou - não precisa emitir código especial (- pode ser negação)
+            if op == '-':
+                temp = self._temp_var()
+                self._emit('sub', temp, '0', valor)
+                return ('num', temp)
+            return (tipo, valor)
         else:
-            self.fatorZao()
+            return self.fatorZao()
 
     def fatorZao(self):
         self._entrar('fatorZao')
         if self.comparar_token('('):
             self.verificar('(')
-            self.atrib()
+            tipo, valor = self.atrib()
             self.verificar(')')
+            return (tipo, valor)
         else:
-            self.fatorZin()
+            return self.fatorZin()
 
     def fatorZin(self):
         self._entrar('fatorZin')
         if self.comparar_token(TokenType.STRING_LITERAL):
+            val = self.token_atual().lexema
             self.verificar(TokenType.STRING_LITERAL)
+            return ('str', val)
 
         elif self.comparar_token(TokenType.IDENTIFIER):
+            val = self.token_atual().lexema
             self.verificar(TokenType.IDENTIFIER)
+            # Retorna a variável ou valor padrão 0 se não inicializada
+            if val not in self.vars_table:
+                self.vars_table[val] = '0'
+            return ('var', val)
         
         elif self.comparar_token(TokenType.NUMBER_REAL):
+            val = self.token_atual().lexema
             self.verificar(TokenType.NUMBER_REAL)
+            return ('num', val)
         
         elif self.comparar_token(TokenType.NUMBER_DECIMAL):
+            val = self.token_atual().lexema
             self.verificar(TokenType.NUMBER_DECIMAL)
+            return ('num', val)
         
         elif self.comparar_token(TokenType.TRUE):
             self.verificar(TokenType.TRUE)
+            return ('bool', '1')
 
         elif self.comparar_token(TokenType.FALSE):
             self.verificar(TokenType.FALSE)
+            return ('bool', '0')
         
         elif self.comparar_token(TokenType.CHAR_LITERAL):
+            val = self.token_atual().lexema
             self.verificar(TokenType.CHAR_LITERAL)
+            return ('char', val)
         else:
             token = self.token_atual()
             raise MineiresSyntaxError("um valor (literal ou identificador)", token.lexema, token.linha, token.coluna)
