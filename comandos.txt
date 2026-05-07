@@ -1,0 +1,26 @@
+(call, read, var, null)
+(call, print, var, null)
+(call, print, null, value)
+
+(jump, label, null, null)
+(if, condition, label1, label2)
+
+(add, res, op1, op2)
+(sub, res, op1, op2)
+(mult, res, op1, op2)
+(div, res, op1, op2)
+(divI, res, op1, op2)
+
+(att, var, value, null)
+
+(and, res, op1, op2)
+(or, res, op1, op2)
+(xor, res, op1, op2)
+(not, res, op1, NULL)
+
+(leq, res, op1, op2)   // <=
+(geq, res, op1, op2)   // >=
+(les, res, op1, op2)   // <
+(grt, res, op1, op2)   // >
+(eq, res, op1, op2)    // =
+(dif, res, op1, op2)   // !=
