@@ -1,6 +1,0 @@
-bora_cumpade main ( ) simbora
-  a fica_assim_entao 10 uai
-  b fica_assim_entao 5 uai
-  soma fica_assim_entao a veiz b uai
-  oia_proce_ve ( soma ) uai
-cabo

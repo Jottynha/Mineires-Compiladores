@@ -19,6 +19,7 @@ class AnalisadorSintatico:
         self.erro = None
         self.codigo = []  # Lista de tuplas de código intermediário
         self.temp_count = 0  # Contador para gerar nomes de temporários
+        self.label_count = 0  # Contador para gerar labels
         self.vars_table = {}  # Tabela simples de variáveis (nome -> valor/tipo)
 
     def token_atual(self) -> Token:
@@ -84,6 +85,11 @@ class AnalisadorSintatico:
         #Gera variavel temporaria
         self.temp_count += 1
         return f"_t{self.temp_count}"
+    
+    def _new_label(self) -> str:
+        # Gera novo label único
+        self.label_count += 1
+        return f"L{self.label_count}"
     
     def comparar_token(self, tipo_ou_chave):
         token = self.token_atual()
@@ -312,8 +318,27 @@ class AnalisadorSintatico:
         self.verificar('(')
         tipo, valor = self.expr()
         self.verificar(')')
+
+        # Geração de labels para o if/else
+        L_true = self._new_label()
+        L_false = self._new_label()
+        L_after = self._new_label()
+
+        # Emite instrução condicional: se cond for verdadeira vai para L_true senão L_false
+        self._emit('if', valor, L_true, L_false)
+
+        # Bloco then
+        self._emit('label', L_true, None, None)
         self.stmt()
+        # após then, pula para o fim
+        self._emit('jump', L_after, None, None)
+
+        # Bloco else (se houver)
+        self._emit('label', L_false, None, None)
         self.elsePart()
+
+        # Label final
+        self._emit('label', L_after, None, None)
 
     def elsePart(self):
         self._entrar('elsePart')
