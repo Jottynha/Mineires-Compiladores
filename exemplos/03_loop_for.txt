@@ -1,0 +1,6 @@
+// Exemplo com for loop
+bora_cumpade main ( ) simbora
+  trem_di_numeru i;
+  roda_esse_trem ( i fica_assim_entao 1 ; i < 5 ; i fica_assim_entao i + 1 )
+    oia_proce_ve ( i );
+cabo

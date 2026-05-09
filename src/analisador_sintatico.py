@@ -251,18 +251,75 @@ class AnalisadorSintatico:
         self._entrar('forStmt')
         self.verificar('roda_esse_trem')
         self.verificar('(')
-        self.optExpr()
+        
+        # Inicialização - consome a expressão e emite código
+        self._inicio_expr_for = False
+        tipo_init, valor_init = self.optExpr()
         self.verificar(';')
-        self.optExpr()
+        
+        # Gera labels para o for
+        L_test = self._new_label()
+        L_body = self._new_label()
+        L_incr = self._new_label()
+        L_exit = self._new_label()
+        
+        # Label de teste da condição
+        self._emit('label', L_test, None, None)
+        
+        # Condição - consome e emite código
+        tipo_cond, valor_cond = self.optExpr()
         self.verificar(';')
-        self.optExpr()
+        
+        # Se condição falsa, sai do loop
+        if valor_cond:
+            self._emit('if', valor_cond, L_body, L_exit)
+        else:
+            # Se não há condição, sempre executa o corpo
+            self._emit('jump', L_body, None, None)
+        
+        # Lê o incremento (sem emitir ainda)
+        self.posicao_incr_start = self.posicao
+        self._skip_expr()
+        self.posicao_incr_end = self.posicao
         self.verificar(')')
+        
+        # Label do corpo
+        self._emit('label', L_body, None, None)
+        
+        # Corpo do for
         self.stmt()
+        
+        # Label do incremento
+        self._emit('label', L_incr, None, None)
+        
+        # Executa incremento: re-processa os tokens do incremento
+        if self.posicao_incr_end > self.posicao_incr_start:
+            posicao_temp = self.posicao
+            self.posicao = self.posicao_incr_start
+            self.optExpr()
+            self.posicao = posicao_temp
+        
+        # Volta para testar condição
+        self._emit('jump', L_test, None, None)
+        
+        # Label de saída
+        self._emit('label', L_exit, None, None)
+    
+    def _skip_expr(self):
+        """Pula uma expressão sem processá-la"""
+        if self._inicio_expr():
+            # Pula identificador/valor inicial
+            self.posicao += 1
+            # Pula operadores e operandos
+            while self.posicao < len(self.tokens) and not self.comparar_token(';') and not self.comparar_token(')'):
+                self.posicao += 1
         
     def optExpr(self):
         self._entrar('optExpr')
         if self._inicio_expr():
             tipo, valor = self.atrib()
+            return tipo, valor
+        return None, None
 
     # Comandos de IO
     def ioStmt(self):
@@ -309,7 +366,29 @@ class AnalisadorSintatico:
         self.verificar('(')
         tipo, valor = self.expr()
         self.verificar(')')
+
+        # Geração de labels para o while
+        L_loop = self._new_label()
+        L_body = self._new_label()
+        L_exit = self._new_label()
+
+        # Emite label de volta (início do loop)
+        self._emit('label', L_loop, None, None)
+
+        # Emite condição: se verdadeira vai para corpo, senão sai
+        self._emit('if', valor, L_body, L_exit)
+
+        # Label do corpo
+        self._emit('label', L_body, None, None)
+
+        # Bloco do while
         self.stmt()
+
+        # Salta de volta para o teste da condição
+        self._emit('jump', L_loop, None, None)
+
+        # Label de saída
+        self._emit('label', L_exit, None, None)
 
     # Comando if
     def ifStmt(self):
