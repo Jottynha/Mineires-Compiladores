@@ -20,7 +20,7 @@ class AnalisadorSintatico:
         self.codigo = []  # Lista de tuplas de código intermediário
         self.temp_count = 0  # Contador para gerar nomes de temporários
         self.label_count = 0  # Contador para gerar labels
-        self.vars_table = {}  # Tabela simples de variáveis (nome -> valor/tipo)
+        self.vars_table = {}  # Tabela de símbolos simples (nome -> tipo)
 
     def token_atual(self) -> Token:
         if self.posicao < len(self.tokens):
@@ -92,22 +92,15 @@ class AnalisadorSintatico:
         return f"L{self.label_count}"
     
     def comparar_token(self, tipo_ou_chave):
-        token = self.token_atual()
-        
+        token = self.token_atual()    
         if isinstance(tipo_ou_chave, str) and tipo_ou_chave in RESERVED_WORDS:
             return token.tipo.value == RESERVED_WORDS[tipo_ou_chave].value
-        
         if isinstance(tipo_ou_chave, TokenType):
             return token.tipo.value == tipo_ou_chave.value
-        
         if isinstance(tipo_ou_chave, int):
             return token.tipo.value == tipo_ou_chave
-        
         if tipo_ou_chave == 'IDENT':
             return token.tipo.value == TokenType.IDENTIFIER.value
-        
-        #return token.lexema == tipo_ou_chave or token.tipo.value == tipo_ou_chave
-        
         return False
         
         
@@ -224,89 +217,84 @@ class AnalisadorSintatico:
             token = self.token_atual()
             self._trace(f"CONSUMIR OK | pos={self.posicao} | esperado=TYPE | encontrado={token.lexema} ({token.tipo.name})")
             self.posicao += 1
-            return True
+            return token.lexema
         else:
             token = self.token_atual()
             raise MineiresSyntaxError("um tipo de dado (trem_...)", token.lexema, token.linha, token.coluna)
 
     def declaration(self):
         self._entrar('declaration')
-        self.type()
-        self.identList()
+        tipo_var = self.type()
+        identificadores = self.identList()
+        for ident in identificadores:
+            self.vars_table[ident] = tipo_var
         self.exigir_terminador()
 
     def identList(self):
         self._entrar('identList')
+        identificadores = [self.token_atual().lexema]
         self.verificar('IDENT')
-        self.restoIdentList()
+        identificadores.extend(self.restoIdentList())
+        return identificadores
 
     def restoIdentList(self):
+        identificadores = []
         if self.comparar_token(','):
             self.verificar(',')
+            identificadores.append(self.token_atual().lexema)
             self.verificar('IDENT')
-            self.restoIdentList()
+            identificadores.extend(self.restoIdentList())
+        return identificadores
 
     # Comando for:
     def forStmt(self):
         self._entrar('forStmt')
         self.verificar('roda_esse_trem')
         self.verificar('(')
-        
         # Inicialização - consome a expressão e emite código
         self._inicio_expr_for = False
         tipo_init, valor_init = self.optExpr()
         self.verificar(';')
-        
         # Gera labels para o for
         L_test = self._new_label()
         L_body = self._new_label()
         L_incr = self._new_label()
         L_exit = self._new_label()
-        
         # Label de teste da condição
         self._emit('label', L_test, None, None)
-        
         # Condição - consome e emite código
         tipo_cond, valor_cond = self.optExpr()
         self.verificar(';')
-        
         # Se condição falsa, sai do loop
         if valor_cond:
             self._emit('if', valor_cond, L_body, L_exit)
         else:
             # Se não há condição, sempre executa o corpo
             self._emit('jump', L_body, None, None)
-        
         # Lê o incremento (sem emitir ainda)
         self.posicao_incr_start = self.posicao
         self._skip_expr()
         self.posicao_incr_end = self.posicao
         self.verificar(')')
-        
         # Label do corpo
         self._emit('label', L_body, None, None)
-        
         # Corpo do for
         self.stmt()
-        
         # Label do incremento
         self._emit('label', L_incr, None, None)
-        
         # Executa incremento: re-processa os tokens do incremento
         if self.posicao_incr_end > self.posicao_incr_start:
             posicao_temp = self.posicao
             self.posicao = self.posicao_incr_start
             self.optExpr()
             self.posicao = posicao_temp
-        
         # Volta para testar condição
         self._emit('jump', L_test, None, None)
-        
         # Label de saída
         self._emit('label', L_exit, None, None)
     
     def _skip_expr(self):
-        """Pula uma expressão sem processá-la"""
+        # Pula uma expressão sem processá-la
         if self._inicio_expr():
             # Pula identificador/valor inicial
             self.posicao += 1
@@ -327,13 +315,13 @@ class AnalisadorSintatico:
         if self.comparar_token('xove'):
             self.verificar('xove')
             self.verificar('(')
-            self.type()
+            tipo_var = self.type()
             self.verificar(',')
             var_name = self.token_atual().lexema
             self.verificar('IDENT')
             self.verificar(')')
             self._emit('call', 'read', var_name, None)
-            self.vars_table[var_name] = '0'  # inicializa com 0
+            self.vars_table[var_name] = tipo_var
             self.exigir_terminador()
 
         elif self.comparar_token('oia_proce_ve'):
@@ -366,27 +354,20 @@ class AnalisadorSintatico:
         self.verificar('(')
         tipo, valor = self.expr()
         self.verificar(')')
-
         # Geração de labels para o while
         L_loop = self._new_label()
         L_body = self._new_label()
         L_exit = self._new_label()
-
         # Emite label de volta (início do loop)
         self._emit('label', L_loop, None, None)
-
         # Emite condição: se verdadeira vai para corpo, senão sai
         self._emit('if', valor, L_body, L_exit)
-
         # Label do corpo
         self._emit('label', L_body, None, None)
-
         # Bloco do while
         self.stmt()
-
         # Salta de volta para o teste da condição
         self._emit('jump', L_loop, None, None)
-
         # Label de saída
         self._emit('label', L_exit, None, None)
 
@@ -397,25 +378,20 @@ class AnalisadorSintatico:
         self.verificar('(')
         tipo, valor = self.expr()
         self.verificar(')')
-
         # Geração de labels para o if/else
         L_true = self._new_label()
         L_false = self._new_label()
         L_after = self._new_label()
-
         # Emite instrução condicional: se cond for verdadeira vai para L_true senão L_false
         self._emit('if', valor, L_true, L_false)
-
         # Bloco then
         self._emit('label', L_true, None, None)
         self.stmt()
         # após then, pula para o fim
         self._emit('jump', L_after, None, None)
-
         # Bloco else (se houver)
         self._emit('label', L_false, None, None)
         self.elsePart()
-
         # Label final
         self._emit('label', L_after, None, None)
 
@@ -430,70 +406,105 @@ class AnalisadorSintatico:
         self._entrar('caseStmt')
         self.verificar('dependenu')
         self.verificar('(')
+        switch_var = self.token_atual().lexema
         self.verificar('IDENT')
         self.verificar(')')
         self.verificar('simbora')
-        self.dosCasos()
+        end_label = self._new_label()
+        self.dosCasos(switch_var, end_label)
         self.verificar('cabo')
+        self._emit('label', end_label, None, None)
 
-    def dosCasos(self):
+    def dosCasos(self, switch_var, end_label):
         self._entrar('dosCasos')
-        self.doCaso()
-        self.restoDosCasos()
+        self.restoDosCasos(switch_var, end_label)
 
-    def doCaso(self): 
+    def doCaso(self, switch_var, end_label): 
         self._entrar('doCaso')
         self.verificar('du_casu')
-        tipo, valor = self.fatorZin()
+        tipo, valor = self.miniFator()
         self.verificar(':')
+        caso_label = self._new_label()
+        proximo_label = self._new_label()
+        temp = self._temp_var()
+        self._emit('eq', temp, switch_var, valor)
+        self._emit('if', temp, caso_label, proximo_label)
+        self._emit('label', caso_label, None, None)
         self.stmt()
+        self._emit('jump', end_label, None, None)
+        self._emit('label', proximo_label, None, None)
     
-    def restoDosCasos(self): 
+    def restoDosCasos(self, switch_var, end_label): 
         if self.comparar_token('du_casu'):
-            self.doCaso()
-            self.restoDosCasos()
+            self.doCaso(switch_var, end_label)
+            self.restoDosCasos(switch_var, end_label)
         elif self.comparar_token('uai_so'):
             self.verificar('uai_so')
             self.verificar(':')
             self.stmt()
+            self._emit('jump', end_label, None, None)
         elif self.comparar_token('cabo'):
             return
+
+    def miniFator(self):
+        self._entrar('miniFator')
+        if self.comparar_token(TokenType.STRING_LITERAL):
+            val = self.token_atual().lexema
+            self.verificar(TokenType.STRING_LITERAL)
+            return ('str', val)
+
+        elif self.comparar_token(TokenType.CHAR_LITERAL):
+            val = self.token_atual().lexema
+            self.verificar(TokenType.CHAR_LITERAL)
+            return ('char', val)
+
+        elif self.comparar_token(TokenType.NUMBER_REAL):
+            val = self.token_atual().lexema
+            self.verificar(TokenType.NUMBER_REAL)
+            return ('num', val)
+
+        elif self.comparar_token(TokenType.NUMBER_DECIMAL):
+            val = self.token_atual().lexema
+            self.verificar(TokenType.NUMBER_DECIMAL)
+            return ('num', val)
+
+        elif self.comparar_token(TokenType.TRUE):
+            self.verificar(TokenType.TRUE)
+            return ('bool', '1')
+
+        elif self.comparar_token(TokenType.FALSE):
+            self.verificar(TokenType.FALSE)
+            return ('bool', '0')
+
+        else:
+            token = self.token_atual()
+            raise MineiresSyntaxError("um valor literal para case", token.lexema, token.linha, token.coluna)
 
     # Expressões:
     def expr(self):
         self._entrar('expr')
         return self.atrib()
-
     def atrib(self):
-        """Trata atribuição e expressões. Retorna (tipo, valor) para código intermediário."""
+        # Trata atribuição e expressões. Retorna (tipo, valor) para código intermediário."""
         self._entrar('atrib')
-        
-        # Detecta padrão: IDENT fica_assim_entao expr
-        if (self.comparar_token(TokenType.IDENTIFIER) and 
-            self.posicao + 1 < len(self.tokens) and 
-            self.tokens[self.posicao + 1].lexema == 'fica_assim_entao'):
-            lhs_token = self.token_atual()
-            lhs = lhs_token.lexema
-            self.verificar(TokenType.IDENTIFIER)
-            self.verificar('fica_assim_entao')
-            
-            # Recursivamente processa o lado direito
-            rhs_tipo, rhs_valor = self.atrib()
-            
-            # Emite atribuição
-            self._emit('att', lhs, rhs_valor, None)
-            self.vars_table[lhs] = rhs_valor
-            return ('var', lhs)
-        
-        # Caso contrário, processa como expressão normal (Or)
         tipo, valor = self.Or()
-        self.restoAtrib()
-        return (tipo, valor)
+        return self.restoAtrib(tipo, valor)
 
-    def restoAtrib(self):
+    def restoAtrib(self, tipo, valor):
         if self.comparar_token('fica_assim_entao'):
+            if tipo != 'var':
+                token = self.token_atual()
+                raise MineiresSyntaxError("uma variável à esquerda de 'fica_assim_entao'", valor, token.linha, token.coluna)
             self.verificar('fica_assim_entao')
-            self.atrib()
+            rhs_tipo, rhs_valor = self.atrib()
+            self._emit('att', valor, rhs_valor, None)
+            if valor not in self.vars_table:
+                if rhs_tipo == 'var':
+                    self.vars_table[valor] = self.vars_table.get(rhs_valor, 'desconhecido')
+                else:
+                    self.vars_table[valor] = rhs_tipo
+            return ('var', valor)
+        return (tipo, valor)
 
     def Or(self):
         self._entrar('Or')
@@ -639,9 +650,6 @@ class AnalisadorSintatico:
         elif self.comparar_token(TokenType.IDENTIFIER):
             val = self.token_atual().lexema
             self.verificar(TokenType.IDENTIFIER)
-            # Retorna a variável ou valor padrão 0 se não inicializada
-            if val not in self.vars_table:
-                self.vars_table[val] = '0'
             return ('var', val)
         
         elif self.comparar_token(TokenType.NUMBER_REAL):
@@ -669,20 +677,3 @@ class AnalisadorSintatico:
         else:
             token = self.token_atual()
             raise MineiresSyntaxError("um valor (literal ou identificador)", token.lexema, token.linha, token.coluna)
-
-# Main para testes rápidos no arquivo:
-if __name__ == "__main__":
-    tokens = [
-        Token('bora_cumpade', TokenType.FUNCTION_DEF, 1, 1),
-        Token('main', TokenType.MAIN, 1, 14),
-        Token('(', TokenType.LPAREN, 1, 19),
-        Token(')', TokenType.RPAREN, 1, 20),
-        Token('simbora', TokenType.BEGIN_BLOCK, 2, 1),
-        Token('cabo', TokenType.END_BLOCK, 3, 1),
-        Token('EOF', TokenType.EOF, 4, 1)
-    ]
-    sint = AnalisadorSintatico(tokens)
-    try:
-        sint.function()
-    except MineiresSyntaxError as e:
-        print(e)

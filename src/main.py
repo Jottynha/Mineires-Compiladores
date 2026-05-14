@@ -1,4 +1,3 @@
-# executa a análise léxica e sintática do Mineires
 import sys
 from typing import Optional
 from pathlib import Path
@@ -42,28 +41,19 @@ def _selecionar_arquivo_exemplo() -> Optional[str]:
                 return str(arquivos[indice - 1])
         print("Opção inválida. Tente novamente.")
 
-
 def main() -> int:
     # == SETUP DE ARQUIVOS == #
     caminho_arquivo = sys.argv[1] if len(sys.argv) > 1 else _selecionar_arquivo_exemplo()
-
     if caminho_arquivo is None:
         return 1
-
     caminho_path = Path(caminho_arquivo)
-
     if not caminho_path.exists():
         caminho_path = EXEMPLOS_DIR / caminho_arquivo
-
     if not caminho_path.exists():
         print(f"Arquivo não encontrado: {caminho_arquivo}")
         return 1
-    
-
     # == CONSTRUÇÃO DO AUTÔMATO == #
     automato = construir_automato()
-    
-
     # == ANÁLISE LÉXICA == #
     lexer = Lexer(automato, mostrar_erros=True)
     lexer.carregar_arquivo(str(caminho_path))
@@ -72,17 +62,14 @@ def main() -> int:
     except LexicalError as erro_lexico:
         print(str(erro_lexico))
         return 1
-    
     print(f"\nArquivo lido: {caminho_path}")
     print(f"Tokens identificados: {len(tokens_identificados)}")
     print("\nTokens (tupla):")
     for token in tokens_identificados:
         print((token.lexema, token.tipo.value, token.linha, token.coluna)) # imprimindo valores do TokenType ao inves do nome associado
     print("\nResumo:")
-    print(f"- Identificados: {len(tokens_identificados)}")
-    print(f"- Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}")
-    
-    
+    print(f"-> Identificados: {len(tokens_identificados)}")
+    print(f"-> Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}")
     # == ANÁLISE SINTÁTICA == #
     analisador_sintatico = AnalisadorSintatico(tokens_identificados) # Criando analisador com objetos Token
     erro_sintatico = None
@@ -94,8 +81,6 @@ def main() -> int:
         print(f"\n{e}")
     if erro_sintatico is not None:
         return 1
-    
-
     # == SALVANDO RESULTADOS == #
     SAIDA_DIR.mkdir(parents=True, exist_ok=True)
     with open(SAIDA_DIR / "saida.txt", "w") as file:
@@ -105,24 +90,22 @@ def main() -> int:
         for token in tokens_identificados:
             file.write(str((token.lexema, token.tipo.name, token.linha, token.coluna)) + "\n")
         file.write("\nResumo:\n")
-        file.write(f"- Identificados: {len(tokens_identificados)}\n")
+        file.write(f"-> Identificados: {len(tokens_identificados)}\n")
         file.write(
-        f"- Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}\n"
+        f"-> Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}\n"
         )
-
         file.write("\n\n== ANÁLISE SINTÁTICA ==\n")
         file.write(f"- Sucesso: {sucesso_sintatico}\n")
         if erro_sintatico is not None:
             file.write(f"- Erro: {erro_sintatico}\n")
-        
+        file.write("\n\n== TABELA DE VARIÁVEIS ==\n")
+        file.write(str(analisador_sintatico.vars_table) + "\n")
         file.write("\n\n== CÓDIGO INTERMEDIÁRIO ==\n")
         for instr in analisador_sintatico.codigo:
             file.write(str(instr) + "\n")
-        
         file.write("\nPassos do analisador sintático:\n")
         for passo in analisador_sintatico.get_trilha():
             file.write(passo + "\n")
-        
     return 0
 
 if __name__ == "__main__":
