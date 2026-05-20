@@ -21,6 +21,7 @@ class AnalisadorSintatico:
         self.temp_count = 0  # Contador para gerar nomes de temporários
         self.label_count = 0  # Contador para gerar labels
         self.vars_table = {}  # Tabela de símbolos simples (nome -> tipo)
+        self.loop_stack = []  # Stack de contextos de loop (break_label, continue_label)
 
     def token_atual(self) -> Token:
         if self.posicao < len(self.tokens):
@@ -175,8 +176,21 @@ class AnalisadorSintatico:
             self.bloco()
             return True
 
-        elif self.comparar_token('para_o_trem') or self.comparar_token('toca_o_trem'):
-            self.verificar(self.token_atual().tipo)
+        elif self.comparar_token('para_o_trem'):
+            self.verificar('para_o_trem')
+            if not self.loop_stack:
+                token = self.token_atual()
+                raise MineiresSyntaxError("'para_o_trem' fora de um loop", token.lexema, token.linha, token.coluna)
+            self._emit('jump', self.loop_stack[-1]['break'], None, None)
+            self.exigir_terminador()
+            return True
+
+        elif self.comparar_token('toca_o_trem'):
+            self.verificar('toca_o_trem')
+            if not self.loop_stack:
+                token = self.token_atual()
+                raise MineiresSyntaxError("'toca_o_trem' fora de um loop", token.lexema, token.linha, token.coluna)
+            self._emit('jump', self.loop_stack[-1]['continue'], None, None)
             self.exigir_terminador()
             return True
         
@@ -260,26 +274,40 @@ class AnalisadorSintatico:
         L_body = self._new_label()
         L_incr = self._new_label()
         L_exit = self._new_label()
-        # Label de teste da condição
-        self._emit('label', L_test, None, None)
-        # Condição - consome e emite código
-        tipo_cond, valor_cond = self.optExpr()
+        # Armazena a posição da condição para reprocessar depois
+        self.posicao_cond_start = self.posicao
+        # Pula a condição para capturar o incremento
+        self._skip_expr()
         self.verificar(';')
+        # Armazena a posição do incremento
+        self.posicao_incr_start = self.posicao
+        self._skip_expr()
+        self.posicao_incr_end = self.posicao
+        self.verificar(')')
+
+        # Label de teste da condição (comparação dentro do label)
+        self._emit('label', L_test, None, None)
+        posicao_temp = self.posicao
+        self.posicao = self.posicao_cond_start
+        tipo_cond, valor_cond = self.optExpr()
+        self.posicao = posicao_temp
+
         # Se condição falsa, sai do loop
         if valor_cond:
             self._emit('if', valor_cond, L_body, L_exit)
         else:
             # Se não há condição, sempre executa o corpo
             self._emit('jump', L_body, None, None)
-        # Lê o incremento (sem emitir ainda)
-        self.posicao_incr_start = self.posicao
-        self._skip_expr()
-        self.posicao_incr_end = self.posicao
-        self.verificar(')')
+
         # Label do corpo
         self._emit('label', L_body, None, None)
+        # Adiciona contexto de loop (break/continue)
+        self.loop_stack.append({'break': L_exit, 'continue': L_incr})
         # Corpo do for
         self.stmt()
+        # Remove contexto de loop
+        self.loop_stack.pop()
+
         # Label do incremento
         self._emit('label', L_incr, None, None)
         # Executa incremento: re-processa os tokens do incremento
@@ -288,6 +316,7 @@ class AnalisadorSintatico:
             self.posicao = self.posicao_incr_start
             self.optExpr()
             self.posicao = posicao_temp
+
         # Volta para testar condição
         self._emit('jump', L_test, None, None)
         # Label de saída
@@ -364,8 +393,12 @@ class AnalisadorSintatico:
         self._emit('if', valor, L_body, L_exit)
         # Label do corpo
         self._emit('label', L_body, None, None)
+        # Adiciona contexto de loop (break/continue)
+        self.loop_stack.append({'break': L_exit, 'continue': L_loop})
         # Bloco do while
         self.stmt()
+        # Remove contexto de loop
+        self.loop_stack.pop()
         # Salta de volta para o teste da condição
         self._emit('jump', L_loop, None, None)
         # Label de saída
