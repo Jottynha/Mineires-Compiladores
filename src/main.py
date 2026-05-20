@@ -6,6 +6,7 @@ from lexer import Lexer, LexicalError
 from token_type import TokenType
 from analisador_sintatico import AnalisadorSintatico
 from analisador_sintatico import MineiresSyntaxError
+from interpretador import Interpretador
 
 # Define o diretório base do projeto
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
@@ -106,6 +107,11 @@ def main() -> int:
         file.write("\nPassos do analisador sintático:\n")
         for passo in analisador_sintatico.get_trilha():
             file.write(passo + "\n")
+        file.write("\n\n== INTERPRETADOR ==\n")
+        interpretador = Interpretador(analisador_sintatico.codigo)
+        interpretador.mapear_labels()
+        interpretador.iniciar_dicionario(analisador_sintatico.codigo)
+        interpretador.printar_codigo()
     return 0
 
 if __name__ == "__main__":
