@@ -381,7 +381,8 @@ class AnalisadorSintatico:
         self._entrar('whileStmt')
         self.verificar('enquanto_tiver_trem')
         self.verificar('(')
-        tipo, valor = self.expr()
+        posicao_cond_start = self.posicao
+        self._skip_expr()
         self.verificar(')')
         # Geração de labels para o while
         L_loop = self._new_label()
@@ -390,6 +391,10 @@ class AnalisadorSintatico:
         # Emite label de volta (início do loop)
         self._emit('label', L_loop, None, None)
         # Emite condição: se verdadeira vai para corpo, senão sai
+        posicao_temp = self.posicao
+        self.posicao = posicao_cond_start
+        tipo, valor = self.expr()
+        self.posicao = posicao_temp
         self._emit('if', valor, L_body, L_exit)
         # Label do corpo
         self._emit('label', L_body, None, None)

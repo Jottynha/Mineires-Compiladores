@@ -12,6 +12,7 @@ from interpretador import Interpretador
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 EXEMPLOS_DIR = SCRIPT_DIR / "exemplos"
 SAIDA_DIR = EXEMPLOS_DIR
+RUN_INTERPRETADOR = True
 
 def _listar_arquivos_exemplo() -> list[Path]:
     if not EXEMPLOS_DIR.exists():
@@ -108,10 +109,26 @@ def main() -> int:
         for passo in analisador_sintatico.get_trilha():
             file.write(passo + "\n")
         file.write("\n\n== INTERPRETADOR ==\n")
-        interpretador = Interpretador(analisador_sintatico.codigo)
-        interpretador.mapear_labels()
-        interpretador.iniciar_dicionario(analisador_sintatico.codigo)
-        interpretador.printar_codigo()
+        if RUN_INTERPRETADOR:
+            interpretador = Interpretador(analisador_sintatico.codigo)
+            sucesso_execucao = interpretador.executar()
+            file.write(f"- Sucesso: {sucesso_execucao}\n")
+            if interpretador.get_erros():
+                file.write("- Erros:\n")
+                file.write(interpretador.get_erros() + "\n")
+            if interpretador.get_saida():
+                file.write("- Saída:\n")
+                file.write(interpretador.get_saida() + "\n")
+            print("\n== INTERPRETADOR ==")
+            print(f"Sucesso: {sucesso_execucao}")
+            if interpretador.get_erros():
+                print("Erros:")
+                print(interpretador.get_erros())
+            if interpretador.get_saida():
+                print("Saída:")
+                print(interpretador.get_saida())
+        else:
+            file.write("- Execução desativada (RUN_INTERPRETADOR=False)\n")
     return 0
 
 if __name__ == "__main__":

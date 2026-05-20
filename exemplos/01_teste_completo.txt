@@ -6,7 +6,7 @@ simbora
     x fica_assim_entao 1 uai
     y fica_assim_entao 2 uai
 
-    roda_esse_trem (x fica_assim_entao 0; x fica_assim_entao 3; x fica_assim_entao x + 1)
+    roda_esse_trem (x fica_assim_entao 0; x < 3; x fica_assim_entao x + 1)
         simbora
             uai_se (x mema_coisa 1)
                 oia_proce_ve("meio") uai
