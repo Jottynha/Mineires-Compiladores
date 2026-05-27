@@ -370,9 +370,20 @@ class AnalisadorSintatico:
     def out(self):
         self._entrar('out')
         tipo, valor = self.fatorZin()
-        # Para print, passamos o operando tipado: se for variável, primeiro campo
-        # recebe ('var',name), caso contrário passamos o literal tipado
-        self._emit('call', 'print', ('var', valor) if tipo == 'var' else None, (tipo, valor) if tipo != 'var' else None)
+        # Para print, emitimos forma simples para facilitar leitura do IR:
+        # - variável: ('call','print', 'nome_var', None)
+        # - literal:  ('call','print', None, lexema_literal)
+        if tipo == 'var':
+            self._emit('call', 'print', valor, None)
+        else:
+            # Reconstruir lexema literal para o interpretador (strings entre aspas)
+            if tipo == 'str':
+                lex = '"' + valor + '"'
+            elif tipo == 'char':
+                lex = "'" + valor + "'"
+            else:
+                lex = str(valor)
+            self._emit('call', 'print', None, lex)
 
     def restoOutList(self):
         if self.comparar_token(','):

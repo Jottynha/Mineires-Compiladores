@@ -4,4 +4,5 @@ simbora
     s fica_assim_entao "ola" uai
     s fica_assim_entao s + "mundo" uai
     oia_proce_ve(s) uai
+    oia_proce_ve(10) uai
 cabo

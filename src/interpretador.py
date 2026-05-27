@@ -70,8 +70,18 @@ class Interpretador:
             func = instrucao[1]
             if func != "print":
                 raise ErroExecucao(f"Chamada não suportada: '{func}'")
-            valor = instrucao[2] if instrucao[2] is not None else instrucao[3]
-            valor_avaliado = self._avaliar_expressao(valor)
+            # O parser emite chamadas 'call' ao print de duas formas:
+            # - ('call','print', ('var', 'x'), None)  -> imprimir variável
+            # - ('call','print', None, ('str','hello')) -> imprimir literal
+            # Preferimos sempre avaliar o operando com _avaliar_expressao
+            operando = instrucao[2] if instrucao[2] is not None else instrucao[3]
+            if operando is None:
+                # nada para imprimir
+                self.saida.append('')
+                return
+            # Avalia o operando tipado (pode ser ('var', name), ('str', value),
+            # um temporário numérico como ('num','_t1') ou uma operação)
+            valor_avaliado = self._avaliar_expressao(operando)
             self.saida.append(str(valor_avaliado))
             return
         if op in {"add", "sub", "mult", "div", "divI", "mod", "eq", "dif", "les", "leq", "grt", "geq", "and", "or", "xor", "not"}:

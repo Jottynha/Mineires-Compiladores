@@ -1,5 +1,5 @@
 == ANÁLISE LÉXICA ==
-Tokens identificados: 25
+Tokens identificados: 30
 
 Tokens (tupla):
 ('bora_cumpade', 'FUNCTION_DEF', 1, 1)
@@ -25,11 +25,16 @@ Tokens (tupla):
 ('s', 'IDENTIFIER', 6, 18)
 (')', 'RPAREN', 6, 19)
 ('uai', 'SEMICOLON', 6, 21)
-('cabo', 'END_BLOCK', 7, 1)
-('EOF', 'EOF', 8, 1)
+('oia_proce_ve', 'OUTPUT', 7, 5)
+('(', 'LPAREN', 7, 17)
+('10', 'NUMBER_DECIMAL', 7, 18)
+(')', 'RPAREN', 7, 20)
+('uai', 'SEMICOLON', 7, 22)
+('cabo', 'END_BLOCK', 8, 1)
+('EOF', 'EOF', 9, 1)
 
 Resumo:
--> Identificados: 25
+-> Identificados: 30
 -> Não identificados: 0
 
 
@@ -45,7 +50,8 @@ Resumo:
 ('att', ('var', 's'), ('str', 'ola'), None)
 ('add', '_t1', ('var', 's'), ('str', 'mundo'))
 ('att', ('var', 's'), ('str', '_t1'), None)
-('call', 'print', ('var', 's'), None)
+('call', 'print', 's', None)
+('call', 'print', None, '10')
 
 Passos do analisador sintático:
 ENTRAR function | pos=0 | atual=bora_cumpade (FUNCTION_DEF)
@@ -133,8 +139,18 @@ ENTRAR fatorZin | pos=20 | atual=s (IDENTIFIER)
 CONSUMIR OK | pos=20 | esperado=TokenType.IDENTIFIER | encontrado=s (IDENTIFIER)
 CONSUMIR OK | pos=21 | esperado=) | encontrado=) (RPAREN)
 CONSUMIR OK | pos=22 | esperado=uai | encontrado=uai (SEMICOLON)
-CONSUMIR OK | pos=23 | esperado=cabo | encontrado=cabo (END_BLOCK)
-CONSUMIR OK | pos=24 | esperado=TokenType.EOF | encontrado=EOF (EOF)
+ENTRAR stmt | pos=23 | atual=oia_proce_ve (OUTPUT)
+ENTRAR ioStmt | pos=23 | atual=oia_proce_ve (OUTPUT)
+CONSUMIR OK | pos=23 | esperado=oia_proce_ve | encontrado=oia_proce_ve (OUTPUT)
+CONSUMIR OK | pos=24 | esperado=( | encontrado=( (LPAREN)
+ENTRAR outList | pos=25 | atual=10 (NUMBER_DECIMAL)
+ENTRAR out | pos=25 | atual=10 (NUMBER_DECIMAL)
+ENTRAR fatorZin | pos=25 | atual=10 (NUMBER_DECIMAL)
+CONSUMIR OK | pos=25 | esperado=TokenType.NUMBER_DECIMAL | encontrado=10 (NUMBER_DECIMAL)
+CONSUMIR OK | pos=26 | esperado=) | encontrado=) (RPAREN)
+CONSUMIR OK | pos=27 | esperado=uai | encontrado=uai (SEMICOLON)
+CONSUMIR OK | pos=28 | esperado=cabo | encontrado=cabo (END_BLOCK)
+CONSUMIR OK | pos=29 | esperado=TokenType.EOF | encontrado=EOF (EOF)
 SUCESSO análise sintática finalizada
 
 
@@ -142,3 +158,4 @@ SUCESSO análise sintática finalizada
 - Sucesso: True
 - Saída:
 olamundo
+10
