@@ -68,21 +68,60 @@ class Interpretador:
             return
         if op == "call":
             func = instrucao[1]
-            if func != "print":
-                raise ErroExecucao(f"Chamada não suportada: '{func}'")
-            # O parser emite chamadas 'call' ao print de duas formas:
-            # - ('call','print', ('var', 'x'), None)  -> imprimir variável
-            # - ('call','print', None, ('str','hello')) -> imprimir literal
-            # Preferimos sempre avaliar o operando com _avaliar_expressao
-            operando = instrucao[2] if instrucao[2] is not None else instrucao[3]
-            if operando is None:
-                # nada para imprimir
-                self.saida.append('')
+            # Suporta print e read
+            if func == "print":
+                # O parser emite chamadas 'call' ao print de duas formas:
+                # - ('call','print', 'nome_var', None)  -> imprimir variável
+                # - ('call','print', None, '"literal"') -> imprimir literal
+                operando = instrucao[2] if instrucao[2] is not None else instrucao[3]
+                if operando is None:
+                    # nada para imprimir
+                    self.saida.append('')
+                    return
+                valor_avaliado = self._avaliar_expressao(operando)
+                self.saida.append(str(valor_avaliado))
                 return
-            # Avalia o operando tipado (pode ser ('var', name), ('str', value),
-            # um temporário numérico como ('num','_t1') ou uma operação)
-            valor_avaliado = self._avaliar_expressao(operando)
-            self.saida.append(str(valor_avaliado))
+            elif func == "read":
+                # Recebe um identificador como operando tipado ('var', nome) ou ('nome',None)
+                operando = instrucao[2] if instrucao[2] is not None else instrucao[3]
+                # Determinar nome da variável destino
+                var_nome = None
+                if isinstance(operando, (tuple, list)) and len(operando) == 2 and operando[0] == 'var':
+                    var_nome = operando[1]
+                elif isinstance(operando, str):
+                    var_nome = operando
+                else:
+                    raise ErroExecucao(f"Operando inválido para read: {operando}")
+                # Ler da entrada padrão (sem prompt)
+                try:
+                    raw = input()
+                except Exception as e:
+                    raise ErroExecucao(f"Erro lendo entrada: {e}")
+                raw = raw.strip()
+                # Tentar converter para int/float, caso contrário manter string
+                val = None
+                if raw == '':
+                    val = ''
+                else:
+                    if raw.isdigit() or (raw.startswith('-') and raw[1:].isdigit()):
+                        try:
+                            val = int(raw)
+                        except Exception:
+                            val = raw
+                    else:
+                        # tenta float
+                        try:
+                            if '.' in raw:
+                                val = float(raw)
+                            else:
+                                val = raw
+                        except Exception:
+                            val = raw
+                # Atribui na tabela de variáveis (cria se não existir)
+                self.variaveis[var_nome] = val
+                return
+            else:
+                raise ErroExecucao(f"Chamada não suportada: '{func}'")
             return
         if op in {"add", "sub", "mult", "div", "divI", "mod", "eq", "dif", "les", "leq", "grt", "geq", "and", "or", "xor", "not"}:
             destino = instrucao[1]

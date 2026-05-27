@@ -1,0 +1,6 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru n uai
+    xove(trem_di_numeru, n) uai
+    oia_proce_ve(n) uai
+cabo
