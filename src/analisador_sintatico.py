@@ -78,8 +78,10 @@ class AnalisadorSintatico:
     def get_trilha(self):
         return self.trilha
     
-    def _emit(self, op: str, arg1: str, arg2: str | None, arg3: str | None):
-        #Emite uma tupla de código intermediário
+    def _emit(self, op: str, arg1, arg2=None, arg3=None):
+        # Emite uma tupla de código intermediário. Os argumentos podem
+        # ser literais tipados na forma (tipo, valor) ou valores simples
+        # como labels/nomes de temporários.
         self.codigo.append((op, arg1, arg2, arg3))
     
     def _temp_var(self) -> str:
@@ -292,11 +294,10 @@ class AnalisadorSintatico:
         tipo_cond, valor_cond = self.optExpr()
         self.posicao = posicao_temp
 
-        # Se condição falsa, sai do loop
-        if valor_cond:
-            self._emit('if', valor_cond, L_body, L_exit)
+        # Se existe condição, emite teste condicional; caso contrário, executa sempre o corpo
+        if tipo_cond is not None:
+            self._emit('if', (tipo_cond, valor_cond), L_body, L_exit)
         else:
-            # Se não há condição, sempre executa o corpo
             self._emit('jump', L_body, None, None)
 
         # Label do corpo
@@ -349,7 +350,8 @@ class AnalisadorSintatico:
             var_name = self.token_atual().lexema
             self.verificar('IDENT')
             self.verificar(')')
-            self._emit('call', 'read', var_name, None)
+            # 'read' recebe como argumento o identificador como operando tipado
+            self._emit('call', 'read', ('var', var_name), None)
             self.vars_table[var_name] = tipo_var
             self.exigir_terminador()
 
@@ -368,7 +370,9 @@ class AnalisadorSintatico:
     def out(self):
         self._entrar('out')
         tipo, valor = self.fatorZin()
-        self._emit('call', 'print', valor if tipo == 'var' else None, valor if tipo != 'var' else None)
+        # Para print, passamos o operando tipado: se for variável, primeiro campo
+        # recebe ('var',name), caso contrário passamos o literal tipado
+        self._emit('call', 'print', ('var', valor) if tipo == 'var' else None, (tipo, valor) if tipo != 'var' else None)
 
     def restoOutList(self):
         if self.comparar_token(','):
@@ -395,7 +399,7 @@ class AnalisadorSintatico:
         self.posicao = posicao_cond_start
         tipo, valor = self.expr()
         self.posicao = posicao_temp
-        self._emit('if', valor, L_body, L_exit)
+        self._emit('if', (tipo, valor), L_body, L_exit)
         # Label do corpo
         self._emit('label', L_body, None, None)
         # Adiciona contexto de loop (break/continue)
@@ -421,7 +425,7 @@ class AnalisadorSintatico:
         L_false = self._new_label()
         L_after = self._new_label()
         # Emite instrução condicional: se cond for verdadeira vai para L_true senão L_false
-        self._emit('if', valor, L_true, L_false)
+        self._emit('if', (tipo, valor), L_true, L_false)
         # Bloco then
         self._emit('label', L_true, None, None)
         self.stmt()
@@ -465,7 +469,8 @@ class AnalisadorSintatico:
         caso_label = self._new_label()
         proximo_label = self._new_label()
         temp = self._temp_var()
-        self._emit('eq', temp, switch_var, valor)
+        # compara o switch_var (variável) com o valor do case (já tipado)
+        self._emit('eq', temp, ('var', switch_var), (tipo, valor))
         self._emit('if', temp, caso_label, proximo_label)
         self._emit('label', caso_label, None, None)
         self.stmt()
@@ -489,12 +494,13 @@ class AnalisadorSintatico:
         if self.comparar_token(TokenType.STRING_LITERAL):
             val = self.token_atual().lexema
             self.verificar(TokenType.STRING_LITERAL)
-            return ('str', val)
+            # remove aspas externas
+            return ('str', val[1:-1])
 
         elif self.comparar_token(TokenType.CHAR_LITERAL):
             val = self.token_atual().lexema
             self.verificar(TokenType.CHAR_LITERAL)
-            return ('char', val)
+            return ('char', val[1:-1])
 
         elif self.comparar_token(TokenType.NUMBER_REAL):
             val = self.token_atual().lexema
@@ -535,7 +541,8 @@ class AnalisadorSintatico:
                 raise MineiresSyntaxError("uma variável à esquerda de 'fica_assim_entao'", valor, token.linha, token.coluna)
             self.verificar('fica_assim_entao')
             rhs_tipo, rhs_valor = self.atrib()
-            self._emit('att', valor, rhs_valor, None)
+            # Emite atribuição onde o destino é uma variável tipada
+            self._emit('att', ('var', valor), (rhs_tipo, rhs_valor), None)
             if valor not in self.vars_table:
                 if rhs_tipo == 'var':
                     self.vars_table[valor] = self.vars_table.get(rhs_valor, 'desconhecido')
@@ -554,7 +561,7 @@ class AnalisadorSintatico:
             self.verificar('quarque_um')
             tipo2, valor2 = self.xor()
             temp = self._temp_var()
-            self._emit('or', temp, valor, valor2)
+            self._emit('or', temp, (tipo, valor), (tipo2, valor2))
             return self.restoOr('bool', temp)
         return (tipo, valor)
 
@@ -568,7 +575,7 @@ class AnalisadorSintatico:
             self.verificar('um_o_oto')
             tipo2, valor2 = self.And()
             temp = self._temp_var()
-            self._emit('xor', temp, valor, valor2)
+            self._emit('xor', temp, (tipo, valor), (tipo2, valor2))
             return self.restoXor('bool', temp)
         return (tipo, valor)
 
@@ -582,7 +589,7 @@ class AnalisadorSintatico:
             self.verificar('tamem')
             tipo2, valor2 = self.Not()
             temp = self._temp_var()
-            self._emit('and', temp, valor, valor2)
+            self._emit('and', temp, (tipo, valor), (tipo2, valor2))
             return self.restoAnd('bool', temp)
         return (tipo, valor)
 
@@ -592,7 +599,7 @@ class AnalisadorSintatico:
             self.verificar('vam_marca')
             tipo, valor = self.Not()
             temp = self._temp_var()
-            self._emit('not', temp, valor, None)
+            self._emit('not', temp, (tipo, valor), None)
             return ('bool', temp)
         else:
             return self.rel()
@@ -613,7 +620,7 @@ class AnalisadorSintatico:
                     'mema_coisa': 'eq', 'neh_nada': 'dif',
                     '<': 'les', '<=': 'leq', '>': 'grt', '>=': 'geq'
                 }
-                self._emit(op_map.get(rel, rel), temp, valor, valor2)
+                self._emit(op_map.get(rel, rel), temp, (tipo, valor), (tipo2, valor2))
                 return ('bool', temp)
         return (tipo, valor)
 
@@ -625,11 +632,38 @@ class AnalisadorSintatico:
     def restoAdd(self, tipo, valor):
         if self.comparar_token("+") or self.comparar_token('-'):
             op = self.token_atual().lexema
+            token_op = self.token_atual()
             self.verificar(self.token_atual().tipo)
             tipo2, valor2 = self.mult()
             temp = self._temp_var()
+            
+            def _is_numeric(t, v):
+                if t == 'num':
+                    return True
+                if t == 'var':
+                    decl = self.vars_table.get(v)
+                    return decl in {'trem_di_numeru', 'trem_cum_virgula'}
+                return False
+            
+            def _is_string(t, v):
+                if t == 'str' or t == 'char':
+                    return True
+                if t == 'var':
+                    decl = self.vars_table.get(v)
+                    return decl in {'trem_discrita', 'trosso'}
+                return False
+            
+            # Concatenação: aceita + entre strings
+            if op == '+' and _is_string(tipo, valor) and _is_string(tipo2, valor2):
+                self._emit('add', temp, (tipo, valor), (tipo2, valor2))
+                return self.restoAdd('str', temp)
+            
+            # Adição aritmética: + e - exigem ambos numéricos
+            if not (_is_numeric(tipo, valor) and _is_numeric(tipo2, valor2)):
+                raise MineiresSyntaxError('operador aritmético aplicado a tipo não numérico', token_op.lexema, token_op.linha, token_op.coluna)
+            
             op_code = 'add' if op == '+' else 'sub'
-            self._emit(op_code, temp, valor, valor2)
+            self._emit(op_code, temp, (tipo, valor), (tipo2, valor2))
             return self.restoAdd('num', temp)
         return (tipo, valor)
 
@@ -644,11 +678,22 @@ class AnalisadorSintatico:
             self.comparar_token('/') or
             self.comparar_token('%')):
             op = self.token_atual().lexema
+            token_op = self.token_atual()
             self.verificar(self.token_atual().tipo)
             tipo2, valor2 = self.uno()
             temp = self._temp_var()
             op_map = {'veiz': 'mult', 'sob': 'divI', '/': 'div', '%': 'mod'}
-            self._emit(op_map.get(op, op), temp, valor, valor2)
+            # Multiplicação/divisão/módulo exigem operandos numéricos (nunca strings)
+            def _is_numeric(t, v):
+                if t == 'num':
+                    return True
+                if t == 'var':
+                    decl = self.vars_table.get(v)
+                    return decl in {'trem_di_numeru', 'trem_cum_virgula'}
+                return False
+            if not (_is_numeric(tipo, valor) and _is_numeric(tipo2, valor2)):
+                raise MineiresSyntaxError('operador aritmético aplicado a tipo não numérico', token_op.lexema, token_op.linha, token_op.coluna)
+            self._emit(op_map.get(op, op), temp, (tipo, valor), (tipo2, valor2))
             return self.restoMult('num', temp)
         return (tipo, valor)
 
@@ -662,7 +707,8 @@ class AnalisadorSintatico:
             # Unário + ou - não precisa emitir código especial (- pode ser negação)
             if op == '-':
                 temp = self._temp_var()
-                self._emit('sub', temp, '0', valor)
+                # subtrai 0 - valor: operando esquerdo é literal numérico
+                self._emit('sub', temp, ('num', '0'), (tipo, valor))
                 return ('num', temp)
             return (tipo, valor)
         else:
@@ -683,7 +729,7 @@ class AnalisadorSintatico:
         if self.comparar_token(TokenType.STRING_LITERAL):
             val = self.token_atual().lexema
             self.verificar(TokenType.STRING_LITERAL)
-            return ('str', val)
+            return ('str', val[1:-1])
 
         elif self.comparar_token(TokenType.IDENTIFIER):
             val = self.token_atual().lexema
@@ -711,7 +757,7 @@ class AnalisadorSintatico:
         elif self.comparar_token(TokenType.CHAR_LITERAL):
             val = self.token_atual().lexema
             self.verificar(TokenType.CHAR_LITERAL)
-            return ('char', val)
+            return ('char', val[1:-1])
         else:
             token = self.token_atual()
             raise MineiresSyntaxError("um valor (literal ou identificador)", token.lexema, token.linha, token.coluna)

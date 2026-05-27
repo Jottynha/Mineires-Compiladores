@@ -16,7 +16,13 @@ class Interpretador:
     def iniciar_dicionario(self):
         for instrucao in self.codigo_fonte:
             if instrucao[0] == "att":
-                self.variaveis[instrucao[1]] = 0
+                destino = instrucao[1]
+                # destino pode ser ('var', nome) ou nome cru
+                if isinstance(destino, (tuple, list)) and len(destino) == 2 and destino[0] == 'var':
+                    nome = destino[1]
+                else:
+                    nome = destino
+                self.variaveis[nome] = 0
     def executar(self):
         self.mapear_labels()
         self.iniciar_dicionario()
@@ -35,7 +41,11 @@ class Interpretador:
         if op == "label":
             return
         if op == "att":
-            var_nome = instrucao[1]
+            destino = instrucao[1]
+            if isinstance(destino, (tuple, list)) and len(destino) == 2 and destino[0] == 'var':
+                var_nome = destino[1]
+            else:
+                var_nome = destino
             valor = self._avaliar_expressao(instrucao[2])
             if var_nome not in self.variaveis:
                 raise ErroExecucao(f"Variável não declarada: '{var_nome}'")
@@ -77,7 +87,36 @@ class Interpretador:
             return 0
         if isinstance(expr, (int, float)):
             return expr
+        # Operando tipado: ('var','x'), ('str','...'), ('num','42'), ('bool','1')
+        if isinstance(expr, (tuple, list)) and len(expr) == 2 and expr[0] in {'var', 'str', 'num', 'bool', 'char'}:
+            tipo, val = expr[0], expr[1]
+            if tipo == 'var':
+                if val in self.variaveis:
+                    return self.variaveis[val]
+                raise ErroExecucao(f"Variável não declarada: '{val}'")
+            if tipo == 'str' or tipo == 'char':
+                # se for temporário/variável, busca o valor já calculado
+                if isinstance(val, str) and val in self.variaveis:
+                    return self.variaveis[val]
+                return val
+            if tipo == 'num':
+                # aceita inteiros e floats na forma textual
+                # se for temporário/variável nome, retorna seu valor se existir
+                if isinstance(val, str) and val in self.variaveis:
+                    return self.variaveis[val]
+                if isinstance(val, (int, float)):
+                    return val
+                s = str(val)
+                return float(s) if '.' in s else int(s)
+            if tipo == 'bool':
+                if isinstance(val, str) and val in self.variaveis:
+                    return 1 if self.variaveis[val] != 0 else 0
+                return 1 if str(val) == '1' else 0
+        # Se for uma instrução/operacao representada por tupla maior
+        if isinstance(expr, (tuple, list)):
+            return self._avaliar_operacao(expr)
         if isinstance(expr, str):
+            # string crua pode ser nome de variável, temporário ou literal com aspas
             if len(expr) >= 2 and ((expr[0] == '"' and expr[-1] == '"') or (expr[0] == "'" and expr[-1] == "'")):
                 return expr[1:-1]
             if expr.isdigit() or (expr.startswith('-') and expr[1:].isdigit()):
@@ -85,8 +124,6 @@ class Interpretador:
             if expr in self.variaveis:
                 return self.variaveis[expr]
             raise ErroExecucao(f"Variável não declarada: '{expr}'")
-        if isinstance(expr, (tuple, list)):
-            return self._avaliar_operacao(expr)
         raise ErroExecucao(f"Expressão inválida: {expr}")
     def _avaliar_operacao(self, instrucao):
         op = instrucao[0]
@@ -96,6 +133,10 @@ class Interpretador:
         esq = self._avaliar_expressao(instrucao[2])
         dir = self._avaliar_expressao(instrucao[3])
         if op == "add":
+            # Concatenação de strings ou adição numérica
+            # Se ambos são strings, concatena; caso contrário, soma números
+            if isinstance(esq, str) and isinstance(dir, str):
+                return esq + dir
             return esq + dir
         if op == "sub":
             return esq - dir
