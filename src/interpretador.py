@@ -79,6 +79,7 @@ class Interpretador:
                     self.saida.append('')
                     return
                 valor_avaliado = self._avaliar_expressao(operando)
+                print(valor_avaliado, flush=True)
                 self.saida.append(str(valor_avaliado))
                 return
             elif func == "read":

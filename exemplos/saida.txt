@@ -12,9 +12,9 @@ Tokens (tupla):
 ('uai', 'SEMICOLON', 3, 22)
 ('oia_proce_ve', 'OUTPUT', 4, 5)
 ('(', 'LPAREN', 4, 17)
-('"Teste de Read: "', 'STRING_LITERAL', 4, 18)
-(')', 'RPAREN', 4, 35)
-('uai', 'SEMICOLON', 4, 37)
+('"Digite um número:"', 'STRING_LITERAL', 4, 18)
+(')', 'RPAREN', 4, 37)
+('uai', 'SEMICOLON', 4, 39)
 ('xove', 'INPUT', 5, 5)
 ('(', 'LPAREN', 5, 9)
 ('trem_di_numeru', 'INT', 5, 10)
@@ -44,7 +44,7 @@ Resumo:
 
 
 == CÓDIGO INTERMEDIÁRIO ==
-('call', 'print', None, '"Teste de Read: "')
+('call', 'print', None, '"Digite um número:"')
 ('call', 'read', ('var', 'n'), None)
 ('call', 'print', 'n', None)
 
@@ -68,10 +68,10 @@ ENTRAR stmt | pos=8 | atual=oia_proce_ve (OUTPUT)
 ENTRAR ioStmt | pos=8 | atual=oia_proce_ve (OUTPUT)
 CONSUMIR OK | pos=8 | esperado=oia_proce_ve | encontrado=oia_proce_ve (OUTPUT)
 CONSUMIR OK | pos=9 | esperado=( | encontrado=( (LPAREN)
-ENTRAR outList | pos=10 | atual="Teste de Read: " (STRING_LITERAL)
-ENTRAR out | pos=10 | atual="Teste de Read: " (STRING_LITERAL)
-ENTRAR fatorZin | pos=10 | atual="Teste de Read: " (STRING_LITERAL)
-CONSUMIR OK | pos=10 | esperado=TokenType.STRING_LITERAL | encontrado="Teste de Read: " (STRING_LITERAL)
+ENTRAR outList | pos=10 | atual="Digite um número:" (STRING_LITERAL)
+ENTRAR out | pos=10 | atual="Digite um número:" (STRING_LITERAL)
+ENTRAR fatorZin | pos=10 | atual="Digite um número:" (STRING_LITERAL)
+CONSUMIR OK | pos=10 | esperado=TokenType.STRING_LITERAL | encontrado="Digite um número:" (STRING_LITERAL)
 CONSUMIR OK | pos=11 | esperado=) | encontrado=) (RPAREN)
 CONSUMIR OK | pos=12 | esperado=uai | encontrado=uai (SEMICOLON)
 ENTRAR stmt | pos=13 | atual=xove (INPUT)
@@ -102,5 +102,5 @@ SUCESSO análise sintática finalizada
 == INTERPRETADOR ==
 - Sucesso: True
 - Saída:
-Teste de Read: 
-
+Digite um número:
+a

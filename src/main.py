@@ -124,9 +124,6 @@ def main() -> int:
             if interpretador.get_erros():
                 print("Erros:")
                 print(interpretador.get_erros())
-            if interpretador.get_saida():
-                print("Saída:")
-                print(interpretador.get_saida())
         else:
             file.write("- Execução desativada (RUN_INTERPRETADOR=False)\n")
     return 0
