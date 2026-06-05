@@ -17,11 +17,26 @@ class AnalisadorSintatico:
         self.posicao = 0
         self.trilha = []
         self.erro = None
-        self.codigo = []  # Lista de tuplas de código intermediário
-        self.temp_count = 0  # Contador para gerar nomes de temporários
-        self.label_count = 0  # Contador para gerar labels
-        self.vars_table = {}  # Tabela de símbolos simples (nome -> tipo)
-        self.loop_stack = []  # Stack de contextos de loop (break_label, continue_label)
+        self.codigo = []        # Lista de tuplas de código intermediário
+        self.temp_count = 0     # Contador para gerar nomes de temporários
+        self.label_count = 0    # Contador para gerar labels
+        self.vars_table = {}    # Tabela de símbolos simples (nome -> tipo)
+        self.loop_stack = []    # Stack de contextos de loop (break_label, continue_label)
+
+        self.MAPA_TIPOS = {
+            # Tipos do Mineirês mapeados para suas famílias
+            'trem_di_numeru': 'NUM',
+            'trem_cum_virgula': 'NUM',
+            'trem_discrita': 'STR',
+            'trosso': 'STR',
+            'trem_discolhe': 'BOOL',
+            
+            # Apelidos das expressões/literais mapeados para as mesmas famílias
+            'num': 'NUM',
+            'str': 'STR',
+            'char': 'STR',
+            'bool': 'BOOL'
+        }
 
     def token_atual(self) -> Token:
         if self.posicao < len(self.tokens):
@@ -105,8 +120,7 @@ class AnalisadorSintatico:
         if tipo_ou_chave == 'IDENT':
             return token.tipo.value == TokenType.IDENTIFIER.value
         return False
-        
-        
+              
     def verificar(self, tipo_ou_chave):
         if self.comparar_token(tipo_ou_chave):
             token = self.token_atual()
@@ -124,7 +138,61 @@ class AnalisadorSintatico:
             self._trace(f"CONSUMIR FALHOU | pos={self.posicao} | esperado={esperado} | encontrado={token.lexema} ({token.tipo.name})")
             raise MineiresSyntaxError(esperado, token.lexema, token.linha, token.coluna)
         
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
+    # -=-=- análise semântica -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
+
+    def declarar_variavel(self, nome, tipo, token):
+        """Adiciona a variável na vars_table checando redeclaração."""
+        if nome in self.vars_table:
+            raise Exception(f"Erro Semântico na linha {token.linha}, coluna {token.coluna}: "
+                            f"A variável '{nome}' já foi declarada anteriormente sô!")
+        self.vars_table[nome] = tipo
+
+    def buscar_declaracao_previa(self, nome, token):
+        """Garante que a variável foi declarada antes do uso."""
+        if nome not in self.vars_table:
+            raise Exception(f"Erro Semântico na linha {token.linha}, coluna {token.coluna}: "
+                            f"Uai, a variável '{nome}' não foi declarada antes de usar!")
+        return self.vars_table[nome]
+    
+    def checar_tipos(self, op1, op2, token_op):
+        """
+        Recebe dois operandos na forma (tipo, valor) e verifica se pertencem à mesma família.
+        Exemplos de entrada: ('var', 'x'), ('num', '10'), ('str', 'uai')
+        """
+        tipo1, valor1 = op1
+        tipo2, valor2 = op2
+
+        # Descobre o tipo real do primeiro operando
+        if tipo1 == 'var':
+            # Se for variável, garante que já foi declarada e pega o tipo do Mineirês
+            tipo1_real = self.buscar_declaracao_previa(valor1, token_op)
+        else:
+            tipo1_real = tipo1
+
+        # Descobre do msm jeito o tipo real do segundo operando
+        if tipo2 == 'var':
+            tipo2_real = self.buscar_declaracao_previa(valor2, token_op)
+        else:
+            tipo2_real = tipo2
+
+        # 3. Busca as famílias dos tipos no MAPA_TIPOS
+        familia1 = self.MAPA_TIPOS.get(tipo1_real)
+        familia2 = self.MAPA_TIPOS.get(tipo2_real)
+
+        # 4. Validando a compatibilidade dos tipos (dando errado dá raise na exceção):
+        if familia1 != familia2:
+            nome1 = f"'{valor1}' ({tipo1_real})" if tipo1 == 'var' else f"literal '{tipo1_real}'"
+            nome2 = f"'{valor2}' ({tipo2_real})" if tipo2 == 'var' else f"literal '{tipo2_real}'"
+            
+            raise Exception(
+                f"Erro Semântico na linha {token_op.linha}: "
+                f"Tipos incompatíveis sô! Não dá pra misturar {nome1} com {nome2}."
+            )
+        
+        # Retorna a familia se os tipos são compatíveis entre si:
+        return familia1
+
+    # -=-=- análise sintática -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
     def function(self):
         self._entrar('function')
@@ -242,8 +310,12 @@ class AnalisadorSintatico:
         self._entrar('declaration')
         tipo_var = self.type()
         identificadores = self.identList()
+
+        token_atual = self.token_atual()
+
         for ident in identificadores:
-            self.vars_table[ident] = tipo_var
+            self.declarar_variavel(ident, tipo_var, token_atual)
+
         self.exigir_terminador()
 
     def identList(self):
@@ -539,6 +611,7 @@ class AnalisadorSintatico:
     def expr(self):
         self._entrar('expr')
         return self.atrib()
+    
     def atrib(self):
         # Trata atribuição e expressões. Retorna (tipo, valor) para código intermediário."""
         self._entrar('atrib')
@@ -546,20 +619,22 @@ class AnalisadorSintatico:
         return self.restoAtrib(tipo, valor)
 
     def restoAtrib(self, tipo, valor):
+        token = self.token_atual()
         if self.comparar_token('fica_assim_entao'):
             if tipo != 'var':
-                token = self.token_atual()
                 raise MineiresSyntaxError("uma variável à esquerda de 'fica_assim_entao'", valor, token.linha, token.coluna)
+            
+            
+            self.buscar_declaracao_previa(valor, token)
+
             self.verificar('fica_assim_entao')
             rhs_tipo, rhs_valor = self.atrib()
-            # Emite atribuição onde o destino é uma variável tipada
+
+            # Checa os tipos:
+            self.checar_tipos(('var', valor), (rhs_tipo, rhs_valor), token)
             self._emit('att', ('var', valor), (rhs_tipo, rhs_valor), None)
-            if valor not in self.vars_table:
-                if rhs_tipo == 'var':
-                    self.vars_table[valor] = self.vars_table.get(rhs_valor, 'desconhecido')
-                else:
-                    self.vars_table[valor] = rhs_tipo
             return ('var', valor)
+        
         return (tipo, valor)
 
     def Or(self):
@@ -642,40 +717,26 @@ class AnalisadorSintatico:
 
     def restoAdd(self, tipo, valor):
         if self.comparar_token("+") or self.comparar_token('-'):
-            op = self.token_atual().lexema
             token_op = self.token_atual()
+            op = token_op.lexema
             self.verificar(self.token_atual().tipo)
             tipo2, valor2 = self.mult()
             temp = self._temp_var()
             
-            def _is_numeric(t, v):
-                if t == 'num':
-                    return True
-                if t == 'var':
-                    decl = self.vars_table.get(v)
-                    return decl in {'trem_di_numeru', 'trem_cum_virgula'}
-                return False
+            # Checa a compatibilidade de tipos
+            familia_resultado = self.checar_tipos((tipo, valor), (tipo2, valor2), token_op)
             
-            def _is_string(t, v):
-                if t == 'str' or t == 'char':
-                    return True
-                if t == 'var':
-                    decl = self.vars_table.get(v)
-                    return decl in {'trem_discrita', 'trosso'}
-                return False
-            
-            # Concatenação: aceita + entre strings
-            if op == '+' and _is_string(tipo, valor) and _is_string(tipo2, valor2):
-                self._emit('add', temp, (tipo, valor), (tipo2, valor2))
-                return self.restoAdd('str', temp)
-            
-            # Adição aritmética: + e - exigem ambos numéricos
-            if not (_is_numeric(tipo, valor) and _is_numeric(tipo2, valor2)):
-                raise MineiresSyntaxError('operador aritmético aplicado a tipo não numérico', token_op.lexema, token_op.linha, token_op.coluna)
-            
+            # Barra a subtração de strings
+            if op == '-' and familia_resultado == 'STR':
+                raise Exception(f"Erro Semântico na linha {token_op.linha}: Uai, não existe subtração de texto sô!")
+                
             op_code = 'add' if op == '+' else 'sub'
             self._emit(op_code, temp, (tipo, valor), (tipo2, valor2))
-            return self.restoAdd('num', temp)
+            
+            # Retorna o tipo simplificado para a próxima operação na árvore
+            ret_tipo = 'str' if familia_resultado == 'STR' else 'num'
+            return self.restoAdd(ret_tipo, temp)
+        
         return (tipo, valor)
 
     def mult(self):
