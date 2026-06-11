@@ -81,6 +81,8 @@ class AnalisadorSintatico:
             TokenType.STRING_LITERAL,
             TokenType.CHAR_LITERAL,
             TokenType.NUMBER_REAL,
+            TokenType.NUMBER_OCTAL,
+            TokenType.NUMBER_HEX,
             TokenType.NUMBER_DECIMAL,
             TokenType.TRUE,
             TokenType.FALSE,
@@ -817,6 +819,18 @@ class AnalisadorSintatico:
         elif self.comparar_token(TokenType.NUMBER_REAL):
             val = self.token_atual().lexema
             self.verificar(TokenType.NUMBER_REAL)
+            return ('num', val)
+        
+        elif self.comparar_token(TokenType.NUMBER_OCTAL):
+            val = self.token_atual().lexema
+            self.verificar(TokenType.NUMBER_OCTAL)
+            val = str(int(val, 8))  # Converte octal para decimal para o IR
+            return ('num', val)
+        
+        elif self.comparar_token(TokenType.NUMBER_HEX):
+            val = self.token_atual().lexema
+            self.verificar(TokenType.NUMBER_HEX)
+            val = str(int(val, 16))  # Converte hexadecimal para decimal para o IR
             return ('num', val)
         
         elif self.comparar_token(TokenType.NUMBER_DECIMAL):
