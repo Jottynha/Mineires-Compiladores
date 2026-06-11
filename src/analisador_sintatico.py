@@ -28,13 +28,13 @@ class AnalisadorSintatico:
             'trem_di_numeru': 'NUM',
             'trem_cum_virgula': 'NUM',
             'trem_discrita': 'STR',
-            'trosso': 'STR',
+            'trosso': 'CHAR',
             'trem_discolhe': 'BOOL',
             
             # Apelidos das expressões/literais mapeados para as mesmas famílias
             'num': 'NUM',
             'str': 'STR',
-            'char': 'STR',
+            'char': 'CHAR',
             'bool': 'BOOL'
         }
 
@@ -178,7 +178,6 @@ class AnalisadorSintatico:
         # 3. Busca as famílias dos tipos no MAPA_TIPOS
         familia1 = self.MAPA_TIPOS.get(tipo1_real)
         familia2 = self.MAPA_TIPOS.get(tipo2_real)
-
         # 4. Validando a compatibilidade dos tipos (dando errado dá raise na exceção):
         if familia1 != familia2:
             nome1 = f"'{valor1}' ({tipo1_real})" if tipo1 == 'var' else f"literal '{tipo1_real}'"
@@ -623,8 +622,6 @@ class AnalisadorSintatico:
         if self.comparar_token('fica_assim_entao'):
             if tipo != 'var':
                 raise MineiresSyntaxError("uma variável à esquerda de 'fica_assim_entao'", valor, token.linha, token.coluna)
-            
-            
             self.buscar_declaracao_previa(valor, token)
 
             self.verificar('fica_assim_entao')
@@ -632,6 +629,10 @@ class AnalisadorSintatico:
 
             # Checa os tipos:
             self.checar_tipos(('var', valor), (rhs_tipo, rhs_valor), token)
+            
+            # Barrando atribuição de string em char
+            if self.vars_table[valor] == 'trosso' and self.MAPA_TIPOS.get(rhs_tipo) == 'STR' and len(rhs_valor) == 1:
+                raise MineiresSyntaxError("atribuição de string em variável do tipo char", valor, token.linha, token.coluna)
             self._emit('att', ('var', valor), (rhs_tipo, rhs_valor), None)
             return ('var', valor)
         
@@ -725,16 +726,21 @@ class AnalisadorSintatico:
             
             # Checa a compatibilidade de tipos
             familia_resultado = self.checar_tipos((tipo, valor), (tipo2, valor2), token_op)
-            
             # Barra a subtração de strings
             if op == '-' and familia_resultado == 'STR':
                 raise Exception(f"Erro Semântico na linha {token_op.linha}: Uai, não existe subtração de texto sô!")
-                
             op_code = 'add' if op == '+' else 'sub'
             self._emit(op_code, temp, (tipo, valor), (tipo2, valor2))
             
             # Retorna o tipo simplificado para a próxima operação na árvore
-            ret_tipo = 'str' if familia_resultado == 'STR' else 'num'
+            if familia_resultado == 'STR':
+                ret_tipo = 'str'
+            elif familia_resultado == 'NUM':
+                ret_tipo = 'num'
+            elif familia_resultado == 'CHAR':
+                ret_tipo = 'str'
+            else:
+                ret_tipo = 'var'  # No caso de variáveis, mantemos 'var' e o nome para código intermediário
             return self.restoAdd(ret_tipo, temp)
         
         return (tipo, valor)
