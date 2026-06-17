@@ -709,6 +709,9 @@ class AnalisadorSintatico:
                     'mema_coisa': 'eq', 'neh_nada': 'dif',
                     '<': 'les', '<=': 'leq', '>': 'grt', '>=': 'geq'
                 }
+                # Verifica a compatibilidade de tipos
+                if not self.checar_tipos((tipo, valor), (tipo2, valor2), self.token_atual()):
+                    raise Exception(f"Erro Semântico na linha {self.token_atual().linha}: Tipos incompatíveis para a comparação {rel}")
                 self._emit(op_map.get(rel, rel), temp, (tipo, valor), (tipo2, valor2))
                 return ('bool', temp)
         return (tipo, valor)
