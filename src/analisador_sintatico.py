@@ -650,6 +650,8 @@ class AnalisadorSintatico:
             self.verificar('quarque_um')
             tipo2, valor2 = self.xor()
             temp = self._temp_var()
+            if not self.checar_tipos((tipo, valor), (tipo2, valor2), self.token_atual()):
+                raise Exception(f"Erro Semântico na linha {self.token_atual().linha}: Tipos incompatíveis para a comparação OR")
             self._emit('or', temp, (tipo, valor), (tipo2, valor2))
             return self.restoOr('bool', temp)
         return (tipo, valor)
@@ -664,6 +666,8 @@ class AnalisadorSintatico:
             self.verificar('um_o_oto')
             tipo2, valor2 = self.And()
             temp = self._temp_var()
+            if not self.checar_tipos((tipo, valor), (tipo2, valor2), self.token_atual()):
+                raise Exception(f"Erro Semântico na linha {self.token_atual().linha}: Tipos incompatíveis para a comparação XOR")
             self._emit('xor', temp, (tipo, valor), (tipo2, valor2))
             return self.restoXor('bool', temp)
         return (tipo, valor)
@@ -678,6 +682,8 @@ class AnalisadorSintatico:
             self.verificar('tamem')
             tipo2, valor2 = self.Not()
             temp = self._temp_var()
+            if not self.checar_tipos((tipo, valor), (tipo2, valor2), self.token_atual()):
+                raise Exception(f"Erro Semântico na linha {self.token_atual().linha}: Tipos incompatíveis para a comparação AND")
             self._emit('and', temp, (tipo, valor), (tipo2, valor2))
             return self.restoAnd('bool', temp)
         return (tipo, valor)
@@ -688,6 +694,8 @@ class AnalisadorSintatico:
             self.verificar('vam_marca')
             tipo, valor = self.Not()
             temp = self._temp_var()
+            if not self.checar_tipos((tipo, valor), ('bool', None), self.token_atual()):
+                raise Exception(f"Erro Semântico na linha {self.token_atual().linha}: Tipos incompatíveis para a operação NOT")
             self._emit('not', temp, (tipo, valor), None)
             return ('bool', temp)
         else:
