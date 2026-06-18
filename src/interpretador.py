@@ -93,6 +93,7 @@ class Interpretador:
                     var_nome = operando
                 else:
                     raise ErroExecucao(f"Operando inválido para read: {operando}")
+                tipo_esperado = instrucao[3]
                 # Ler da entrada padrão (sem prompt)
                 try:
                     raw = input()
@@ -100,30 +101,43 @@ class Interpretador:
                     raise ErroExecucao(f"Erro lendo entrada: {e}")
                 raw = raw.strip()
                 # Tentar converter para int/float, caso contrário manter string
-                val = None
-                if raw == '':
-                    val = ''
-                else:
-                    if raw.isdigit() or (raw.startswith('-') and raw[1:].isdigit()):
-                        try:
-                            val = int(raw)
-                        except Exception:
-                            val = raw
+                if tipo_esperado == 'trem_di_numeru':
+                    try:
+                        val = int(raw)
+                    except ValueError:
+                        raise ErroExecucao(
+                        f"Esperado número inteiro para '{var_nome}', mas recebeu '{raw}'"
+                    )
+                elif tipo_esperado == 'trem_cum_virgula':
+                    try:
+                        val = float(raw)
+                    except ValueError:
+                        raise ErroExecucao(
+                        f"Esperado número real para '{var_nome}', mas recebeu '{raw}'"
+                    )
+                elif tipo_esperado == 'trem_discrita':
+                    val = raw
+                elif tipo_esperado == 'trosso':
+                    if len(raw) != 1:
+                        raise ErroExecucao(
+                        f"Esperado um caractere para '{var_nome}', mas recebeu '{raw}'"
+                    )
+                    val = raw
+                elif tipo_esperado == 'trem_discolhe':
+                    if raw.lower() in ('1', 'true', 'verdadeiro'):
+                        val = 1
+                    elif raw.lower() in ('0', 'false', 'falso'):
+                        val = 0
                     else:
-                        # tenta float
-                        try:
-                            if '.' in raw:
-                                val = float(raw)
-                            else:
-                                val = raw
-                        except Exception:
-                            val = raw
-                # Atribui na tabela de variáveis (cria se não existir)
-                self.variaveis[var_nome] = val
-                return
+                        raise ErroExecucao(
+                        f"Esperado valor booleano para '{var_nome}', mas recebeu '{raw}'"
+                    )
+                else:
+                    raise ErroExecucao(f"Tipo desconhecido: {tipo_esperado}")
+                    return
             else:
                 raise ErroExecucao(f"Chamada não suportada: '{func}'")
-            return
+                return
         if op in {"add", "sub", "mult", "div", "divI", "mod", "eq", "dif", "les", "leq", "grt", "geq", "and", "or", "xor", "not"}:
             destino = instrucao[1]
             resultado = self._avaliar_operacao(instrucao)

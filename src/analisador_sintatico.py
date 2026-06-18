@@ -171,7 +171,7 @@ class AnalisadorSintatico:
         else:
             tipo1_real = tipo1
 
-        # Descobre do msm jeito o tipo real do segundo operando
+        # Descobre do mesmo jeito o tipo real do segundo operando
         if tipo2 == 'var':
             tipo2_real = self.buscar_declaracao_previa(valor2, token_op)
         else:
@@ -190,9 +190,8 @@ class AnalisadorSintatico:
                 f"Tipos incompatíveis sô! Não dá pra misturar {nome1} com {nome2}."
             )
         
-        # Retorna a familia se os tipos são compatíveis entre si:
+        # Retorna a família se os tipos são compatíveis entre si:
         return familia1
-
     # -=-=- análise sintática -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
     def function(self):
@@ -423,8 +422,12 @@ class AnalisadorSintatico:
             var_name = self.token_atual().lexema
             self.verificar('IDENT')
             self.verificar(')')
-            # 'read' recebe como argumento o identificador como operando tipado
-            self._emit('call', 'read', ('var', var_name), None)
+            # Verifica a compatibilidade de tipos do identificador
+            op1 = ('var', var_name)
+            token_op = self.token_atual()
+            if not self.checar_tipos(op1, (tipo_var, tipo_var), token_op):
+                raise Exception(f"Erro Semântico na linha {token_op.linha}: Tipos incompatíveis para a variável '{var_name}'")            # 'read' recebe como argumento o identificador como operando tipado
+            self._emit('call', 'read', ('var', var_name), tipo_var)
             self.vars_table[var_name] = tipo_var
             self.exigir_terminador()
 
