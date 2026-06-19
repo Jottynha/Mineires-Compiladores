@@ -1,0 +1,14 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x fica_assim_entao 1 uai
+
+    dependenu (x) simbora
+        du_casu 1:
+            oia_proce_ve("primeiro") uai
+        du_casu 1:
+            oia_proce_ve("duplicado") uai
+        uai_so:
+            oia_proce_ve("default") uai
+    cabo
+cabo

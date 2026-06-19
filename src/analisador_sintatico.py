@@ -485,6 +485,26 @@ class AnalisadorSintatico:
         posicao_temp = self.posicao
         self.posicao = posicao_cond_start
         tipo, valor = self.expr()
+
+        eh_bool = False
+
+        if tipo == 'bool':
+            eh_bool = True
+
+        elif tipo == 'var':
+            tipo_real = self.buscar_declaracao_previa(
+                valor,
+                self.token_atual()
+            )
+
+            eh_bool = (tipo_real == 'trem_discolhe')
+
+        if not eh_bool:
+            token = self.token_atual()
+            raise Exception(
+                f"Erro Semântico na linha {token.linha}: "
+                f"A condição do 'enquanto_tiver_trem' deve ser booleana!"
+            )
         self.posicao = posicao_temp
         self._emit('if', (tipo, valor), L_body, L_exit)
         # Label do corpo
@@ -506,6 +526,22 @@ class AnalisadorSintatico:
         self.verificar('uai_se')
         self.verificar('(')
         tipo, valor = self.expr()
+        # condição deve ser booleana
+        eh_bool = False
+        if tipo == 'bool':
+            eh_bool = True
+        elif tipo == 'var':
+            tipo_real = self.buscar_declaracao_previa(
+                valor,
+                self.token_atual()
+            )
+            eh_bool = (tipo_real == 'trem_discolhe')
+        if not eh_bool:
+            token = self.token_atual()
+            raise Exception(
+                f"Erro Semântico na linha {token.linha}: "
+                f"A condição do 'uai_se' deve ser booleana sô!"
+            )
         self.verificar(')')
         # Geração de labels para o if/else
         L_true = self._new_label()
@@ -540,18 +576,42 @@ class AnalisadorSintatico:
         self.verificar(')')
         self.verificar('simbora')
         end_label = self._new_label()
-        self.dosCasos(switch_var, end_label)
+        casos_usados = set()
+        self.dosCasos(
+            switch_var,
+            end_label,
+            casos_usados
+        )
         self.verificar('cabo')
         self._emit('label', end_label, None, None)
 
-    def dosCasos(self, switch_var, end_label):
+    def dosCasos(self, switch_var, end_label, casos_usados):
         self._entrar('dosCasos')
-        self.restoDosCasos(switch_var, end_label)
+        self.restoDosCasos(
+            switch_var,
+            end_label,
+            casos_usados
+        )
 
-    def doCaso(self, switch_var, end_label): 
+    def doCaso(
+        self,
+        switch_var,
+        end_label,
+        casos_usados
+    ): 
         self._entrar('doCaso')
         self.verificar('du_casu')
         tipo, valor = self.miniFator()
+        chave = (tipo, valor)
+
+        if chave in casos_usados:
+            token = self.token_atual()
+            raise Exception(
+                f"Erro Semântico na linha {token.linha}: "
+                f"Valor duplicado em 'du_casu': {valor}"
+            )
+
+        casos_usados.add(chave)
         self.verificar(':')
         caso_label = self._new_label()
         proximo_label = self._new_label()
@@ -564,10 +624,19 @@ class AnalisadorSintatico:
         self._emit('jump', end_label, None, None)
         self._emit('label', proximo_label, None, None)
     
-    def restoDosCasos(self, switch_var, end_label): 
+    def restoDosCasos(
+        self,
+        switch_var,
+        end_label,
+        casos_usados
+    ): 
         if self.comparar_token('du_casu'):
-            self.doCaso(switch_var, end_label)
-            self.restoDosCasos(switch_var, end_label)
+            self.doCaso(
+                switch_var,
+                end_label,
+                casos_usados
+            )
+            self.restoDosCasos(switch_var, end_label, casos_usados)
         elif self.comparar_token('uai_so'):
             self.verificar('uai_so')
             self.verificar(':')

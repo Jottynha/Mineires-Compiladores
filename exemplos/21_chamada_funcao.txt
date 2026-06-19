@@ -1,0 +1,10 @@
+bora_cumpade soma(trem_di_numeru a, trem_di_numeru b)
+simbora
+    ta_bao a + b uai
+cabo
+
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x fica_assim_entao soma(1) uai
+cabo
