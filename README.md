@@ -42,6 +42,37 @@ para a linguagem _Minerês_
 </div>
 
 ---
+## Arquitetura Geral do Sistema
+
+O sistema foi desenvolvido seguindo a arquitetura clássica de compiladores, composta pelas etapas de análise léxica, análise sintática, análise semântica, geração de código intermediário e interpretação.
+
+O fluxo de execução do compilador é representado na Figura abaixo.
+
+```text
+Código Fonte
+     │
+     ▼
+Análise Léxica
+     │
+     ▼
+Lista de Tokens
+     │
+     ▼
+Análise Sintática
+     │
+     ▼
+Análise Semântica
+     │
+     ▼
+Código Intermediário
+     │
+     ▼
+Interpretador
+     │
+     ▼
+Saída do Programa
+
+---
 #### ℹ️: Arquivos do repositório
 ---
 
@@ -141,7 +172,7 @@ O `Lexer` percorre o código caractere a caractere e combina duas estratégias:
 Separou-se os dados da lógica, o AFD fica no arquivo de grafo, enquanto a lógica de execução fica em `src/analisador_lexico/lexer.py`, facilitando manutenção e ajustes da linguagem. Além disso há o maior lexema válido (maximal munch), pois o lexer tenta consumir o maior trecho reconhecível antes de classificar o token. Ademais palavras reservadas só são classificadas como tal quando o lexema é exato; se estiverem concatenadas em um nome maior, o token vira `IDENTIFIER`. E, ao detectar erro léxico, a análise é interrompida com `LexicalError` e posição precisa (linha/coluna), o que simplifica o diagnóstico.
 
 ---
-### PARTE 2/3: Analisador Sintático
+### PARTE 2: Analisador Sintático
 ---
 <div align="justify">
 <p>A implementação do analisador sintático se deu através do arquivo <i>analisador_sinatico.py</i>, onde a classe AnalisadorSintatico foi devidamente implementada para uso na main.</p> 
@@ -159,9 +190,61 @@ Separou-se os dados da lógica, o AFD fica no arquivo de grafo, enquanto a lógi
 - Durante a verificação de tokens, a comparação é feita com valores inteiros (embora a classe armazene e use tokens para outras funções);
 - O log das verificações é disponibilizado no arquivo `saida.txt` para verificação posterior, embora o terminal notifique o primeiro erro encontrado ou se a análise foi bem-sucedida;
 
-### PARTE 4: Interpretador
-- O interpretador é implementado no arquivo `interpretador.py` e é responsável por executar o código do Minerês, interpretando o código intermediário gerado pelo analisador sintático. Ele processa as estruturas sintáticas reconhecidas e executa as ações correspondentes, como atribuições, controle de fluxo, operações aritméticas, etc. 
+---
+### PARTE 3: Analisador Semântica
+---
 
+A análise semântica foi incorporada ao analisador sintático por meio de verificações executadas durante o percurso da árvore sintática implícita.
+
+O principal objetivo dessa etapa é garantir que programas sintaticamente válidos também sejam semanticamente consistentes.
+
+As verificações implementadas incluem:
+
+- Declaração prévia de variáveis antes de sua utilização;
+- Detecção de redeclaração de identificadores;
+- Verificação de compatibilidade entre tipos;
+- Validação de expressões lógicas em estruturas condicionais e de repetição;
+- Verificação de atribuições incompatíveis;
+- Detecção de valores duplicados em estruturas `dependenu`;
+- Verificação de operações aritméticas aplicadas apenas a tipos numéricos.
+
+Para auxiliar essas verificações, o compilador mantém uma tabela de símbolos simplificada contendo os identificadores declarados e seus respectivos tipos.
+
+#### Geração de Código Intermediário
+
+Após a validação sintática e semântica, o compilador gera uma representação intermediária do programa baseada em instruções de três endereços.
+
+Essa representação abstrai os detalhes da linguagem fonte e facilita a execução posterior pelo interpretador.
+
+As instruções geradas incluem:
+
+- Atribuições (`att`);
+- Operações aritméticas (`add`, `sub`, `mult`, `div`, `divI`, `mod`);
+- Operações relacionais (`eq`, `dif`, `les`, `leq`, `grt`, `geq`);
+- Operações lógicas (`and`, `or`, `xor`, `not`);
+- Saltos incondicionais (`jump`);
+- Saltos condicionais (`if`);
+- Definição de rótulos (`label`);
+- Chamadas de funções internas (`call`).
+
+O uso de código intermediário permite desacoplar a etapa de análise da etapa de execução, aproximando a implementação da estrutura encontrada em compiladores reais.
+
+---
+### PARTE 4: Interpretador
+---
+
+O interpretador é responsável por executar o código intermediário gerado pelo compilador.
+
+Durante a execução, são mantidas estruturas responsáveis por:
+
+- Controle do fluxo de execução;
+- Armazenamento de variáveis;
+- Avaliação de expressões;
+- Resolução de rótulos;
+- Tratamento de operações aritméticas e lógicas;
+- Entrada e saída de dados.
+
+Além disso, o interpretador realiza verificações em tempo de execução, como divisão por zero e acesso a variáveis inexistentes.
 
 ## Como executar:
 
