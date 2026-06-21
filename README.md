@@ -47,14 +47,26 @@ para a linguagem _Minerês_
 
 ```
 ├── exemplos
-│   ├── 01_uai_mundo.txt
-│   ├── 02_par_ou_impar.txt
-│   ├── 03_switch_case.txt
-│   ├── 04_controles.txt
-│   ├── 05_teste_completo.txt
-│   ├── 06_fibonacci.txt
-│   ├── 07_codigo_errado.txt
-│   ├── 08_par_impar_errado.txt
+│   ├── 01_teste_completo.txt
+│   ├── 02_loop_while.txt
+│   ├── 03_loop_for.txt
+│   ├── 04_switch_case.txt
+│   ├── 05_fibonacci.txt
+│   ├── 06_codigo_errado.txt
+│   ├── 07_erro_atrib.txt
+│   ├── 08_concatenar.txt
+│   ├── 09_invalido_char_op.txt
+│   ├── 10_xove(read).txt
+│   ├── 11_eq_str.txt
+│   ├── 12_conversao_numeral.txt
+│   ├── 13_dif_types.txt
+│   ├── 14_div_zero.txt
+│   ├── 15_redeclaracao.txt
+│   ├── 16_declaracao_previa.txt
+│   ├── 17_OR_op.txt
+│   ├── 18_str_op_error.txt
+│   ├── 19_condicao_nao_booleana_if.txt
+│   ├── 20_caso_duplicado_switch.txt
 │   └── saida.txt
 ├── grafos
 │   └── automato_simples.txt
@@ -63,37 +75,51 @@ para a linguagem _Minerês_
 └── src
     ├── analisador_sintatico.py
     ├── automato.py
+    ├── interpretador.py
     ├── lexer.py
     ├── main.py
     ├── mineires_token.py
     └── token_type.py
 ```
+
 ---
 
-- `exemplos/`: casos de teste válidos e com erros.
-    - `01_uai_mundo.txt`: O "Hello World" do Minerês;
-    - `02_par_ou_impar.txt`: Verifica se um número é par ou ímpar;
-    - `03_switch_case.txt`: Testa um switch case simples;
-    - `04_controles.txt`: Testa desvios e laços de repetição;
-    - `05_teste_completo.txt`: Teste mais abrangente da gramática;
-    - `06_fibonacci.txt`: Implementação de Fibonacci não-recursivo em Minerês;
-    - `07_codigo_errado.txt`: Testa um Uai Mundo com erro sintático;
-    - `08_par_impar_errado.txt`: Testa um par ou ímpar com erro sintático;
+- `exemplos/`: Esta pasta contém casos de teste válidos e com erros para testar a funcionalidade do Minerês. Alguns exemplos incluem:
+  - `01_teste_completo.txt`: Um exemplo completo de diversas funções do Minerês.
+  - `02_loop_while.txt`: Um exemplo que imprime valores usando um loop while.
+  - `03_loop_for.txt`: Um exemplo que usa um loop for com teste de break e continue.
+  - `04_switch_case.txt`: Um exemplo que testa um switch case simples.
+  - `05_fibonacci.txt`: Um exemplo que implementa a sequência de Fibonacci não-recursiva em Minerês.
+  - `06_codigo_errado.txt`: Um exemplo com erro sintático.
+  - `07_erro_atrib.txt`: Um exemplo com erro de atribuição.
+  - `08_concatenar.txt`: Um exemplo que concatena strings.
+  - `09_invalido_char_op.txt`: Um exemplo com operação inválida com caracteres (atribuir dois char dentro de um).
+  - `10_xove(read).txt`: Um exemplo que usa a função `read` para ler uma variável.
+  - `11_eq_str.txt`: Um exemplo que compara uma string com outra.
+  - `12_conversao_numeral.txt`: Um exemplo que converte número octal para um número decimal.
+  - `13_dif_types.txt`: Um exemplo de erro que compara tipos de dados diferentes.
+  - `14_div_zero.txt`: Um exemplo de erro que divide por zero.
+  - `15_redeclaracao.txt`: Um exemplo de erro que redeclara uma variável.
+  - `16_declaracao_previa.txt`: Um exemplo de erro que declara uma variável previamente.
+  - `17_OR_op.txt`: Um exemplo que usa operador OR.
+  - `18_str_op_error.txt`: Um exemplo com operação inválida com strings.
+  - `19_condicao_nao_booleana_if.txt`: Um exemplo com condição não booleana em um if.
+  - `20_caso_duplicado_switch.txt`: Um exemplo com caso duplicado em um switch.
 
-- `grafos/`: pasta que armazena o conteúdo de AFDs analisados pelo script.
-    - `automato_simples.txt`: Arquivo de texto qua armazena textualmente os estados e transições do AFD que descreve a linguagem Minerês.
+- `grafos/`: Esta pasta contém o conteúdo de AFDs analisados pelo script. Atualmente, o arquivo `automato_simples.txt` é usado para construir o AFD que descreve a linguagem Minerês.
 
-- `mineres.gmr`: arquivo original da gramática do Minerês.
+- `mineres.gmr`: Este arquivo contém a gramática original do Minerês.
 
-- `README.MD`: este arquivo.
+- `README.MD`: Este arquivo descreve o projeto e seus arquivos principais.
 
-- `src/`: pasta que armazena os principais scripts do projeto.
-    - `src/analisador_sintatico.py`: arquivo de implementação da parte de análise sintática do projeto como através da classe `AnalisadorSintatico`;
-    - `src/automato.py`: carrega e constrói o AFD definido em `grafos/automato_simples.txt`.
-    - `src/lexer.py`: executa a análise léxica e gera tokens com posição (linha/coluna).
-    - `src/token_type.py`: define `TokenType` e o mapeamento de palavras reservadas.
-    - `src/mineires_token.py`: estrutura do token (`lexema`, `tipo`, `linha`, `coluna`).
-    - `src/main.py`: ponto de entrada; lê arquivo, executa o lexer e grava saída.
+- `src/`: Esta pasta contém os principais scripts do projeto.
+  - `src/analisador_sintatico.py`: Este arquivo contém a implementação da parte de análise sintática do projeto, representada pela classe `AnalisadorSintatico`.
+  - `src/automato.py`: Este arquivo carrega e constrói o AFD definido em `grafos/automato_simples.txt`.
+  - `src/interpretador.py`: Este arquivo é responsável por interpretar o código do Minerês, executando as ações correspondentes aos tokens e estruturas sintáticas reconhecidas.
+  - `src/lexer.py`: Este arquivo executa a análise léxica e gera tokens com posição (linha/coluna).
+  - `src/token_type.py`: Este arquivo define `TokenType` e o mapeamento de palavras reservadas.
+  - `src/mineires_token.py`: Este arquivo define a estrutura do token (`lexema`, `tipo`, `linha`, `coluna`).
+  - `src/main.py`: Este arquivo é o ponto de entrada do projeto. Ele lê um arquivo, executa o lexer e grava a saída.
 
 ---
 
@@ -115,7 +141,7 @@ O `Lexer` percorre o código caractere a caractere e combina duas estratégias:
 Separou-se os dados da lógica, o AFD fica no arquivo de grafo, enquanto a lógica de execução fica em `src/analisador_lexico/lexer.py`, facilitando manutenção e ajustes da linguagem. Além disso há o maior lexema válido (maximal munch), pois o lexer tenta consumir o maior trecho reconhecível antes de classificar o token. Ademais palavras reservadas só são classificadas como tal quando o lexema é exato; se estiverem concatenadas em um nome maior, o token vira `IDENTIFIER`. E, ao detectar erro léxico, a análise é interrompida com `LexicalError` e posição precisa (linha/coluna), o que simplifica o diagnóstico.
 
 ---
-### PARTE 2: Analisador Sintático
+### PARTE 2/3: Analisador Sintático
 ---
 <div align="justify">
 <p>A implementação do analisador sintático se deu através do arquivo <i>analisador_sinatico.py</i>, onde a classe AnalisadorSintatico foi devidamente implementada para uso na main.</p> 
@@ -133,6 +159,8 @@ Separou-se os dados da lógica, o AFD fica no arquivo de grafo, enquanto a lógi
 - Durante a verificação de tokens, a comparação é feita com valores inteiros (embora a classe armazene e use tokens para outras funções);
 - O log das verificações é disponibilizado no arquivo `saida.txt` para verificação posterior, embora o terminal notifique o primeiro erro encontrado ou se a análise foi bem-sucedida;
 
+### PARTE 4: Interpretador
+- O interpretador é implementado no arquivo `interpretador.py` e é responsável por executar o código do Minerês, interpretando o código intermediário gerado pelo analisador sintático. Ele processa as estruturas sintáticas reconhecidas e executa as ações correspondentes, como atribuições, controle de fluxo, operações aritméticas, etc. 
 
 
 ## Como executar:
