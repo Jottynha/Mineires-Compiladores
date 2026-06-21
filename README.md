@@ -71,7 +71,7 @@ Interpretador
      │
      ▼
 Saída do Programa
-
+```
 ---
 #### ℹ️: Arquivos do repositório
 ---
