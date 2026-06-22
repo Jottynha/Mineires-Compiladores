@@ -26,8 +26,10 @@ para a linguagem _Minerês_
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Partes do projeto](#partes-do-projeto)
-    - [Analisador Léxico](#parte-1-analisador-léxico)
-    - [Analisador Sintático](#parte-2-analisador-sintático)
+    - [1: Analisador Léxico](#parte-1-analisador-léxico)
+    - [2: Analisador Sintático](#parte-2-analisador-sintático)
+    - [3: Analisador Semântico](#parte-3-analisador-semântico)
+    - [4: Interpretador](#parte-4-interpretador)
 - [Como executar](#como-executar)
 - [Colaboradores](#colaboradores)
 - [Referências](#referências)
@@ -191,7 +193,7 @@ Separou-se os dados da lógica, o AFD fica no arquivo de grafo, enquanto a lógi
 - O log das verificações é disponibilizado no arquivo `saida.txt` para verificação posterior, embora o terminal notifique o primeiro erro encontrado ou se a análise foi bem-sucedida;
 
 ---
-### PARTE 3: Analisador Semântica
+### PARTE 3: Analisador Semântico
 ---
 
 A análise semântica foi incorporada ao analisador sintático por meio de verificações executadas durante o percurso da árvore sintática implícita.
