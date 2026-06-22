@@ -8,6 +8,7 @@ class EstadoTipo(Enum):
     INICIAL = auto()
     INTERMEDIARIO = auto()
     FINAL = auto()
+
 class Automato:
     def __init__(self, nome: str = "Automato"):
         self.nome = nome
@@ -15,6 +16,7 @@ class Automato:
         self.estados: dict[str, EstadoTipo] = {} 
         self.token_por_estado: dict[str, Any] = {} # tokens a estados relevantes
         self.transicoes_char: dict[str, dict[str, str]] = {} # origem -> (caractere -> destino)
+    
     def adicionar_estado(
         self,
         nome: str,
@@ -28,6 +30,7 @@ class Automato:
             self.estado_inicial = nome
         self.transicoes_char.setdefault(nome, {}) #declaração em caso de não existir, para evitar erros depois
         return self
+    
     def adicionar_transicao(
         self,
         origem: str,
@@ -40,10 +43,13 @@ class Automato:
             raise ValueError("Transições só podem ser por caractere")
         self.transicoes_char[origem][caractere] = destino
         return self
+    
     def proximo_estado(self, estado_atual: str, caractere: str) -> Optional[str]:
         return self.transicoes_char.get(estado_atual, {}).get(caractere)
+    
     def eh_estado_final(self, estado: str) -> bool:
         return self.estados.get(estado) == EstadoTipo.FINAL
+    
     def get_token_type(self, estado: str) -> Optional[Any]:
         return self.token_por_estado.get(estado)
 

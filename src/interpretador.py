@@ -9,10 +9,12 @@ class Interpretador:
         self.saida = []
         self.erros = []
         self.pc = 0
+
     def mapear_labels(self):
         for idx, instrucao in enumerate(self.codigo_fonte):
             if instrucao[0] == "label":
                 self.labels[instrucao[1]] = idx
+    
     def iniciar_dicionario(self):
         for instrucao in self.codigo_fonte:
             if instrucao[0] == "att":
@@ -23,6 +25,7 @@ class Interpretador:
                 else:
                     nome = destino
                 self.variaveis[nome] = 0
+    
     def executar(self):
         self.mapear_labels()
         self.iniciar_dicionario()
@@ -36,6 +39,7 @@ class Interpretador:
                 self.erros.append(str(e))
                 return False
         return True
+    
     def _executar_instrucao(self, instrucao):
         op = instrucao[0]
         if op == "label":
@@ -146,6 +150,7 @@ class Interpretador:
             self.variaveis[destino] = resultado
             return
         raise ErroExecucao(f"Instrução desconhecida: '{op}'")
+    
     def _avaliar_expressao(self, expr):
         if expr is None:
             return 0
@@ -189,6 +194,7 @@ class Interpretador:
                 return self.variaveis[expr]
             raise ErroExecucao(f"Variável não declarada: '{expr}'")
         raise ErroExecucao(f"Expressão inválida: {expr}")
+    
     def _avaliar_operacao(self, instrucao):
         op = instrucao[0]
         if op == "not":
@@ -233,10 +239,13 @@ class Interpretador:
         if op == "xor":
             return 1 if ((esq != 0) ^ (dir != 0)) else 0
         raise ErroExecucao(f"Operação inválida: '{op}'")
+    
     def get_saida(self):
         return "\n".join(self.saida)
+    
     def get_erros(self):
         return "\n".join(self.erros) if self.erros else None
+    
     def printar_info(self):
         print("\n== INTERPRETADOR ==")
         print("Código intermediário:")
@@ -254,4 +263,3 @@ class Interpretador:
             print("\nErros durante execução:")
             for erro in self.erros:
                 print(f"! {erro}")
-

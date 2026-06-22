@@ -54,8 +54,10 @@ def main() -> int:
     if not caminho_path.exists():
         print(f"Arquivo não encontrado: {caminho_arquivo}")
         return 1
+    
     # == CONSTRUÇÃO DO AUTÔMATO == #
     automato = construir_automato()
+    
     # == ANÁLISE LÉXICA == #
     lexer = Lexer(automato, mostrar_erros=True)
     lexer.carregar_arquivo(str(caminho_path))
@@ -72,6 +74,7 @@ def main() -> int:
     print("\nResumo:")
     print(f"-> Identificados: {len(tokens_identificados)}")
     print(f"-> Não identificados: {sum(1 for token in lexer.tokens if token.tipo == TokenType.ERROR)}")
+    
     # == ANÁLISE SINTÁTICA == #
     analisador_sintatico = AnalisadorSintatico(tokens_identificados) # Criando analisador com objetos Token
     erro_sintatico = None
@@ -83,6 +86,7 @@ def main() -> int:
         print(f"\n{e}")
     if erro_sintatico is not None:
         return 1
+    
     # == SALVANDO RESULTADOS == #
     SAIDA_DIR.mkdir(parents=True, exist_ok=True)
     with open(SAIDA_DIR / "saida.txt", "w") as file:
